@@ -114,7 +114,7 @@ const userSchema = new mongoose.Schema(
     refParentPer: {
       type: Number,
       required: true
-    }
+    },
     parentName: {
       type: String,
       default: 'Admin'
@@ -546,6 +546,206 @@ app.put('/api/change-password', async (req, res) => {
 
     res.json({ message: 'Password changed successfully' });
   } catch (err) {
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+
+// ----------------------||Notification||----------------------
+
+
+
+const notificationSchema = new mongoose.Schema({
+  userName: { type: String, required: true },
+  message: { type: String, required: true },
+  type: { type: String, enum: ['alert', 'message'], default: 'message' },
+  timestamp: { type: Date, default: Date.now },
+  status: { type: String, enum: ['read', 'unread'], default: 'unread' }
+});
+
+const Notification = mongoose.model('Notification', notificationSchema);
+
+
+// API Endpoints
+app.get('/api/notifications/:username', async (req, res) => {
+  try {
+    const notifications = await Notification.find({ userName: req.params.username });
+    if (!notifications || notifications.length === 0) {
+      return res.status(404).json({ message: 'No notifications found for this user' });
+    }
+    res.json(notifications);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching notifications', error: error.message });
+  }
+});
+
+// Create a new notification
+app.post('/api/notifications', async (req, res) => {
+  const { userName, message, type } = req.body;
+
+  try {
+    const newNotification = new Notification({ userName, message, type });
+    await newNotification.save();
+    res.status(201).json(newNotification);
+  } catch (error) {
+    res.status(500).json({ message: 'Error creating notification', error: error.message });
+  }
+});
+
+// Update a notification's status
+app.put('/api/notifications/:id', async (req, res) => {
+  const { status } = req.body;
+
+  try {
+    const updatedNotification = await Notification.findByIdAndUpdate(req.params.id, { status }, { new: true });
+    if (!updatedNotification) {
+      return res.status(404).json({ message: 'Notification not found' });
+    }
+    res.json(updatedNotification);
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating notification status', error: error.message });
+  }
+});
+
+
+
+
+//------------------------||widthdrawal Approval Queue||--------------------------
+
+const withdrawalRequestSchema = new mongoose.Schema(
+  {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true
+    },
+    amount: {
+      type: Number,
+      required: true
+    },
+    status: {
+      type: String,
+      enum: ['pending', 'approved', 'rejected'],
+      default: 'pending'
+    },
+    accountNumber: {
+      type: String,
+      required: true
+    },
+    accountTitle: {
+      type: String,
+      required: true
+    },
+    gateway: {
+      type: String,
+      required: true
+    }
+  },
+  { timestamps: true }
+);
+
+
+
+const WithdrawalRequest = mongoose.model('WithdrawalRequest', withdrawalRequestSchema);
+app.post('/api/withdraw-balance', async (req, res) => {
+  console.log('Request body received:', req.body);
+  const { username, withdrawAmount, gateway, accountNumber, accountTitle } = req.body;
+
+  try {
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    console.log('Username received:', username);
+
+    // Check if user has enough balance for withdrawal
+    if (user.balance < withdrawAmount) {
+      return res.status(400).json({ message: 'Insufficient balance for withdrawal.' });
+    }
+
+    // Create a new withdrawal request using the WithdrawalRequest schema
+    const newWithdrawalRequest = new WithdrawalRequest({
+      userId: user._id,
+      amount: withdrawAmount,
+      accountNumber,
+      accountTitle,
+      gateway,
+    });
+
+    // Save the withdrawal request
+    await newWithdrawalRequest.save();
+
+    // Deduct the amount from the user's balance
+    user.balance -= withdrawAmount;
+    await user.save();
+
+    // Create a transaction record for the withdrawal
+    const newTransaction = new Transaction({
+      userId: user._id,
+      type: 'withdrawal',
+      amount: withdrawAmount,
+      status: 'pending', // Set to 'pending' initially; you can update this later as needed
+      details: `Withdrawal of ${withdrawAmount} via ${gateway}`,
+    });
+
+    // Save the transaction record
+    await newTransaction.save();
+
+    // Send success response
+    res.status(200).json({ message: 'Withdrawal request submitted successfully.', requestId: newWithdrawalRequest._id });
+  } catch (error) {
+    console.error('Error processing withdrawal request:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+
+
+// ------------------------------||Transactions schema||-----------------------
+const transactionSchema = new mongoose.Schema(
+  {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true
+    },
+    type: {
+      type: String,
+      enum: ['withdrawal', 'deposit', 'trainingBonus'], // Add more types if needed
+      required: true
+    },
+    amount: {
+      type: Number,
+      required: true
+    },
+    status: {
+      type: String,
+      enum: ['pending', 'completed', 'failed'],
+      default: 'pending'
+    },
+    details: {
+      type: String,
+      default: '' // Extra info about the transaction
+    }
+  },
+  { timestamps: true } // Adds createdAt and updatedAt fields
+);
+
+const Transaction = mongoose.model('Transaction', transactionSchema);
+
+app.get('/api/transactions/:username', async (req, res) => {
+  try {
+    const user = await User.findOne({ username: req.params.username });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Fetch all transactions related to the user
+    const transactions = await Transaction.find({ userId: user._id }).sort({ createdAt: -1 });
+
+    res.json(transactions);
+  } catch (error) {
+    console.error('Error fetching transaction history:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });

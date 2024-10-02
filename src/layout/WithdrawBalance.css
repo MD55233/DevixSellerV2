@@ -1,0 +1,46 @@
+.success-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+  }
+  
+  .tick-animation {
+    font-size: 50px; /* Adjust the size of the tick */
+    animation: scale 0.5s ease-in-out; /* Animation effect */
+  }
+  
+  @keyframes scale {
+    0% {
+      transform: scale(0);
+    }
+    50% {
+      transform: scale(1.2);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+  
+  .tick-enter {
+    opacity: 0;
+    transform: scale(0);
+  }
+  
+  .tick-enter-active {
+    opacity: 1;
+    transform: scale(1);
+    transition: opacity 300ms, transform 300ms;
+  }
+  
+  .tick-exit {
+    opacity: 1;
+    transform: scale(1);
+  }
+  
+  .tick-exit-active {
+    opacity: 0;
+    transform: scale(0);
+    transition: opacity 300ms, transform 300ms;
+  }
+  
