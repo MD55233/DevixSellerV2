@@ -19,7 +19,7 @@ const AllTransaction = Loadable(lazy(() => import('views/utilities/AllTransactio
 const DepositHistory = Loadable(lazy(() => import('views/utilities/DepositHistory')));
 const WithdrawHistory = Loadable(lazy(() => import('views/utilities/WithdrawHistory')));
 const TrainingBonusHistory = Loadable(lazy(() => import('views/utilities/TrainingBonusHistory')));
-const InvestmentHistory = Loadable(lazy(() => import('views/utilities/InvestmentHistory')));
+const ProductHistory = Loadable(lazy(() => import('views/utilities/ProductHistory')));
 // Wallet routing
 const Wallet = Loadable(lazy(() => import('views/wallet/Wallet')));
 const AddWallet = Loadable(lazy(() => import('views/wallet/AddWallet')));
@@ -84,8 +84,8 @@ const MainRoutes = {
       path: 'Transactions',
       children: [
         {
-          path: 'investment-history',
-          element: <InvestmentHistory />
+          path: 'product-history',
+          element: <ProductHistory />
         }
       ]
     },

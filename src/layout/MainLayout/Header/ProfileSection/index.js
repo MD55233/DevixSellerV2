@@ -54,8 +54,8 @@ const ProfileSection = () => {
 
   const handleLogout = async () => {
     try {
-      setAuthenticatedUsername(null); // ------Clear the username from context
-      navigate('/pages/login/login3'); // -----Navigate to the login page
+      setAuthenticatedUsername(null); // Clear the username from context
+      navigate('/pages/login/login3'); // Navigate to the login page
       console.log('Logged Out!');
     } catch (error) {
       console.error('There was an error logging out!', error);
@@ -172,17 +172,28 @@ const ProfileSection = () => {
                       <Grid container spacing={3} direction="column">
                         <Grid item>
                           <Typography variant="subtitle1" sx={{ color: 'primary.dark' }}>
-                            Plan: {userData.plan}
+                            Plan: {userData ? userData.plan : 'Loading...'}
                           </Typography>
                         </Grid>
                         <Grid item>
                           <Typography variant="subtitle1" sx={{ color: 'primary.dark' }}>
-                            Direct Refferal: {userData.parentName}
+                            Direct Referral: {userData ? userData.parentName : 'Loading...'}
                           </Typography>
                         </Grid>
                         <Grid item>
                           <Typography variant="subtitle1" sx={{ color: 'primary.dark' }}>
-                            Indirect Refferal: {userData.grandParentName}
+                            Indirect Referral: {userData ? userData.grandParentName : 'Loading...'}
+                          </Typography>
+                        </Grid>
+                        {/* Add Username and Email Here */}
+                        <Grid item>
+                          <Typography variant="subtitle1" sx={{ color: 'primary.dark' }}>
+                            Username: {userData ? userData.username : 'Loading...'}
+                          </Typography>
+                        </Grid>
+                        <Grid item>
+                          <Typography variant="subtitle1" sx={{ color: 'primary.dark' }}>
+                            Email: {userData ? userData.email : 'Loading...'}
                           </Typography>
                         </Grid>
                       </Grid>
