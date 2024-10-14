@@ -114,7 +114,7 @@ const userSchema = new mongoose.Schema(
     refParentPer: {
       type: Number,
       required: true
-    }
+    },
     parentName: {
       type: String,
       default: 'Admin'
@@ -123,6 +123,14 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: 'Admin'
     },
+    productProfitHistory: [
+      {
+        amount: { type: Number, required: true },
+        directPointsIncrement: { type: Number, required: true },
+        totalPointsIncrement: { type: Number, required: true },
+        createdAt: { type: Date, default: Date.now },
+      },
+    ],
 
   },
   {
@@ -166,7 +174,6 @@ app.post('/api/authenticate', async (req, res) => {
     res.status(500).json({ success: false, error: 'Server error' });
   }
 });
-
 //------------------------||Training Bonus Approval Queue||--------------------------
 
 const TrainingBonusApprovalSchema = new mongoose.Schema(
@@ -184,6 +191,42 @@ const TrainingBonusApprovalSchema = new mongoose.Schema(
 );
 
 const TrainingBonusApproval = mongoose.model('TrainingBonusApproval', TrainingBonusApprovalSchema);
+
+// Define approved schema
+const TrainingBonusApprovedSchema = new mongoose.Schema(
+  {
+    username: { type: String, required: true },
+    transactionId: { type: String, required: true },
+    transactionAmount: { type: Number, required: true },
+    gateway: { type: String, required: true },
+    addedPoints: { type: Number, required: true },
+    imagePath: { type: String, required: true },
+    status: { type: String, default: 'approved' }
+  },
+  {
+    timestamps: true // Automatically adds createdAt and updatedAt timestamps
+  }
+);
+
+const TrainingBonusApproved = mongoose.model('TrainingBonusApproved', TrainingBonusApprovedSchema);
+
+// Define rejected schema
+const TrainingBonusRejectedSchema = new mongoose.Schema(
+  {
+    username: { type: String, required: true },
+    transactionId: { type: String, required: true },
+    transactionAmount: { type: Number, required: true },
+    gateway: { type: String, required: true },
+    imagePath: { type: String, required: true },
+    feedback: { type: String, required: true },
+    status: { type: String, default: 'rejected' }
+  },
+  {
+    timestamps: true // Automatically adds createdAt and updatedAt timestamps
+  }
+);
+
+const TrainingBonusRejected = mongoose.model('TrainingBonusRejected', TrainingBonusRejectedSchema);
 
 // Multer storage configuration
 const storage = multer.diskStorage({
@@ -237,6 +280,40 @@ app.post('/api/training-bonus/upload', upload.single('image'), async (req, res) 
     res.status(500).json({ error: 'Internal server error.' });
   }
 });
+
+// Fetch training bonuses for the user
+app.get('/api/training-bonus/:username', async (req, res) => {
+  try {
+    const bonuses = await TrainingBonusApproval.find({ username: req.params.username }).sort({ createdAt: -1 });
+    res.json(bonuses);
+  } catch (error) {
+    console.error('Error fetching training bonuses:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Fetch approved training bonuses for the user
+app.get('/api/approvals/approve/:username', async (req, res) => {
+  try {
+    const approvedBonuses = await TrainingBonusApproved.find({ username: req.params.username }).sort({ createdAt: -1 });
+    res.json(approvedBonuses);
+  } catch (error) {
+    console.error('Error fetching approved training bonuses:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Fetch rejected training bonuses for the user
+app.get('/api/approvals/reject/:username', async (req, res) => {
+  try {
+    const rejectedBonuses = await TrainingBonusRejected.find({ username: req.params.username }).sort({ createdAt: -1 });
+    res.json(rejectedBonuses);
+  } catch (error) {
+    console.error('Error fetching rejected training bonuses:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 //       ]------------------------||Investment Plans Model||----------------------------[
 
 const planSchema = new mongoose.Schema({
@@ -280,34 +357,43 @@ app.get('/api/users/:username', async (req, res) => {
   }
 });
 
-// Define schema for ReferralPaymentVerification
-const referralPaymentSchema = new mongoose.Schema(
-  {
-    username: { type: String, required: true },
-    transactionId: { type: String, required: true },
-    transactionAmount: { type: Number, required: true },
-    gateway: { type: String, required: true },
-    planName: { type: String, required: true },
-    planPRICE: { type: Number, required: true },
-    advancePoints: { type: Number, required: true },
-    DirectPoint: { type: Number, required: true },
-    IndirectPoint: { type: Number, required: true },
-    refPer: { type: Number, required: true },
-    refParentPer: { type: Number, required: true },
-    referrerPin: { type: String, required: true, unique: true },
-    imagePath: { type: String, required: true },
-    status: { type: String, default: 'pending' }
-  },
-  { timestamps: true }
-);
+const referralPaymentSchema = new mongoose.Schema({
+  username: { type: String, required: true },
+  transactionId: { type: String, required: true },
+  transactionAmount: { type: Number, required: true },
+  gateway: { type: String, required: true },
+  planName: { type: String, required: true },
+  planPRICE: { type: Number, required: true },
+  advancePoints: { type: Number, required: true },
+  DirectPoint: { type: Number, required: true },
+  IndirectPoint: { type: Number, required: true },
+  refPer: { type: Number, required: true },
+  refParentPer: { type: Number, required: true },
+  referrerPin: { type: String, required: true, unique: true },
+  imagePath: { type: String, required: true },
+  status: { type: String, default: 'pending' }
+}, { timestamps: true });
+
 const ReferralPaymentVerification = mongoose.model('ReferralPaymentVerification', referralPaymentSchema);
+const ReferralApproveds = mongoose.model('ReferralApproveds', referralPaymentSchema);
+const referralRejectedSchema = new mongoose.Schema({
+  username: { type: String, required: true },
+  transactionId: { type: String, required: true },
+  transactionAmount: { type: Number, required: true },
+  gateway: { type: String, required: true },
+  imagePath: { type: String, required: true },
+  reason: { type: String, required: true },
+  status: { type: String, default: 'rejected' }
+}, { timestamps: true });
+
+const ReferralRejected = mongoose.model('ReferralRejected', referralRejectedSchema);
 
 // Multer storage configuration
 const referralStorage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, '../uploads/referral-plan-payment'); // Upload directory for referral payments
+  destination: (req, file, cb) => {
+    cb(null, '../uploads/referral-plan-payment');
   },
-  filename: function (req, file, cb) {
+  filename: (req, file, cb) => {
     const ext = path.extname(file.originalname);
     cb(null, file.fieldname + '-' + Date.now() + ext);
   }
@@ -316,8 +402,6 @@ const referralStorage = multer.diskStorage({
 const uploadReferral = multer({ storage: referralStorage });
 
 //----------------------|| POST route to handle payment verification upload||-------------------
-
-// Function to generate a unique pin
 const generateUniquePin = async () => {
   let pin;
   let isUnique = false;
@@ -337,6 +421,7 @@ app.post('/api/referral-payment/upload', uploadReferral.single('image'), async (
   try {
     // Generate a unique referrer pin
     const referrerPin = await generateUniquePin();
+    
     // Create a new ReferralPaymentVerification instance
     const newPayment = new ReferralPaymentVerification({
       username: req.body.username,
@@ -364,6 +449,44 @@ app.post('/api/referral-payment/upload', uploadReferral.single('image'), async (
     res.status(500).json({ error: 'Failed to save payment verification details.' });
   }
 });
+
+// Endpoint to fetch referral payment verifications by username
+app.get('/api/referral-payment/:username', async (req, res) => {
+  const { username } = req.params;
+
+  try {
+    const referralPayments = await ReferralPaymentVerification.find({ username: username });
+    res.json(referralPayments);
+  } catch (error) {
+    console.error('Error fetching referral payment verifications:', error);
+    res.status(500).json({ error: 'Failed to fetch referral payment verifications.' });
+  }
+});
+
+// Fetch approvals by username
+app.get('/api/approvals/referral/approve/:username', async (req, res) => {
+  const { username } = req.params;
+  try {
+    const approvals = await ReferralApproveds.find({ username });
+    res.json(approvals);
+  } catch (error) {
+    console.error('Error fetching approvals:', error);
+    res.status(500).send('Server error');
+  }
+});
+
+// Fetch rejected approvals by username
+app.get('/api/approvals/referral/reject/:username', async (req, res) => {
+  const { username } = req.params;
+  try {
+    const rejectedApprovals = await ReferralRejected.find({ username });
+    res.json(rejectedApprovals);
+  } catch (error) {
+    console.error('Error fetching rejected approvals:', error);
+    res.status(500).send('Server error');
+  }
+});
+
 
 // User Accounts Model
 const userAccountsSchema = new mongoose.Schema(
@@ -547,5 +670,167 @@ app.put('/api/change-password', async (req, res) => {
     res.json({ message: 'Password changed successfully' });
   } catch (err) {
     res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+
+// ----------------------||Notification||----------------------
+
+
+
+const notificationSchema = new mongoose.Schema({
+  userName: { type: String, required: true },
+  message: { type: String, required: true },
+  type: { type: String, enum: ['alert', 'message'], default: 'message' },
+  timestamp: { type: Date, default: Date.now },
+  status: { type: String, enum: ['read', 'unread'], default: 'unread' }
+});
+
+const Notification = mongoose.model('Notification', notificationSchema);
+
+
+// API Endpoints
+app.get('/api/notifications/:username', async (req, res) => {
+  try {
+    const notifications = await Notification.find({ userName: req.params.username });
+    if (!notifications || notifications.length === 0) {
+      return res.status(404).json({ message: 'No notifications found for this user' });
+    }
+    res.json(notifications);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching notifications', error: error.message });
+  }
+});
+
+// Create a new notification
+app.post('/api/notifications', async (req, res) => {
+  const { userName, message, type } = req.body;
+
+  try {
+    const newNotification = new Notification({ userName, message, type });
+    await newNotification.save();
+    res.status(201).json(newNotification);
+  } catch (error) {
+    res.status(500).json({ message: 'Error creating notification', error: error.message });
+  }
+});
+
+// Update a notification's status
+app.put('/api/notifications/:id', async (req, res) => {
+  const { status } = req.body;
+
+  try {
+    const updatedNotification = await Notification.findByIdAndUpdate(req.params.id, { status }, { new: true });
+    if (!updatedNotification) {
+      return res.status(404).json({ message: 'Notification not found' });
+    }
+    res.json(updatedNotification);
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating notification status', error: error.message });
+  }
+});
+
+
+
+//------------------------||WithdrawalRequest Schema (Client Side)||--------------------------
+
+const withdrawalRequestSchema = new mongoose.Schema(
+  {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true
+    },
+    amount: {
+      type: Number,
+      required: true
+    },
+    status: {
+      type: String,
+      enum: ['pending', 'approved', 'rejected'],
+      default: 'pending'
+    },
+    accountNumber: {
+      type: String,
+      required: true
+    },
+    accountTitle: {
+      type: String,
+      required: true
+    },
+    gateway: {
+      type: String,
+      required: true
+    },
+    remarks: {
+      type: String,
+      default: null // This field is for admin remarks, especially in case of rejection
+    }
+  },
+  { timestamps: true }
+);
+
+const WithdrawalRequest = mongoose.model('WithdrawalRequest', withdrawalRequestSchema);
+
+// Submit a withdrawal request (User Side - No remarks, status is 'pending')
+// Submit a withdrawal request (User Side - No balance deduction, status is 'pending')
+app.post('/api/withdraw-balance', async (req, res) => {
+  const { username, withdrawAmount, gateway, accountNumber, accountTitle } = req.body;
+
+  try {
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Create and save new withdrawal request (No balance deduction here)
+    const newWithdrawalRequest = new WithdrawalRequest({
+      userId: user._id,
+      amount: withdrawAmount,
+      accountNumber,
+      accountTitle,
+      gateway
+    });
+    await newWithdrawalRequest.save();
+
+    res.status(200).json({ message: 'Withdrawal request submitted successfully.', requestId: newWithdrawalRequest._id });
+  } catch (error) {
+    console.error('Error processing withdrawal request:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Fetch withdrawal requests (Transactions) for the user
+app.get('/api/withdrawals/:username', async (req, res) => {
+  try {
+    const user = await User.findOne({ username: req.params.username });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Fetch all withdrawal requests (acts as transactions)
+    const withdrawalRequests = await WithdrawalRequest.find({ userId: user._id }).sort({ createdAt: -1 });
+
+    res.json(withdrawalRequests); // Return the request with status and remarks (if any)
+  } catch (error) {
+    console.error('Error fetching withdrawal history:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+
+app.get('/api/users/product-profit-history/:username', async (req, res) => {
+  const { username } = req.params;
+
+  try {
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.json(user.productProfitHistory);
+  } catch (error) {
+    console.error('Error fetching product profit history:', error);
+    res.status(500).json({ message: 'Failed to fetch product profit history' });
   }
 });

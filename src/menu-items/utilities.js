@@ -49,10 +49,10 @@ const utilities = {
       breadcrumbs: false
     },
     {
-      id: 'Investment History',
-      title: 'Investment History',
+      id: 'Product Profit History',
+      title: 'Product Profit History',
       type: 'item',
-      url: '/Transactions/investment-history',
+      url: '/Transactions/product-history',
       icon: icons.IconChartHistogram,
       breadcrumbs: false
     }

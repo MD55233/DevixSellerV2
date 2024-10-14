@@ -196,7 +196,7 @@ const NotificationSection = () => {
                             <Divider sx={{ my: 0 }} />
                           </Grid>
                         </Grid>
-                        <NotificationList />
+                        <NotificationList  />
                       </PerfectScrollbar>
                     </Grid>
                   </Grid>
