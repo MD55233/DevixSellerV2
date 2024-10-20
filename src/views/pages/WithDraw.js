@@ -114,67 +114,78 @@ const WithdrawBalance = () => {
 
       <Grid item xs={12} sm={6}>
         <Paper elevation={3} sx={{ padding: 2 }}>
-          <form onSubmit={handleSubmit}>
-            <TextField
-              required
-              fullWidth
-              id="withdrawAmount"
-              label="Withdraw Amount"
-              type="number"
-              value={withdrawAmount}
-              onChange={(e) => setWithdrawAmount(e.target.value)}
-              margin="normal"
-              variant="outlined"
-            />
-
-            <FormControl fullWidth margin="normal" variant="outlined">
-              <InputLabel id="wallet-label">Select Wallet</InputLabel>
-              <Select
-                labelId="wallet-label"
-                id="wallet"
-                value={selectedWallet}
-                onChange={handleWalletChange}
-                label="Select Wallet"
-              >
-                {wallets.map((wallet) => (
-                  <MenuItem key={wallet._id} value={wallet._id}>
-                    {wallet.gateway}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
-            <TextField
-              required
-              fullWidth
-              id="accountNumber"
-              label="Account Number"
-              value={accountNumber}
-              margin="normal"
-              variant="outlined"
-              disabled // Disable to prevent manual entry
-            />
-
-            <TextField
-              required
-              fullWidth
-              id="accountTitle"
-              label="Account Title"
-              value={accountTitle}
-              margin="normal"
-              variant="outlined"
-              disabled // Disable to prevent manual entry
-            />
-
-            <Box display="flex" justifyContent="center" sx={{ marginTop: 2 }}>
-              <Button type="submit" variant="contained" color="primary" disabled={!withdrawAmount || !selectedWallet}>
-                Submit Withdraw Request
-              </Button>
-              <Button variant="outlined" onClick={handleAddWallet} sx={{ marginLeft: 2 }}>
-                Add More Wallet
+          {wallets.length === 0 ? ( // Check if there are wallets available
+            <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center">
+              <Typography variant="h6" color="text.secondary" sx={{ marginBottom: 2 }}>
+                No wallets added. Please add a wallet to proceed.
+              </Typography>
+              <Button variant="contained" color="primary" onClick={handleAddWallet}>
+                Add Wallet
               </Button>
             </Box>
-          </form>
+          ) : (
+            <form onSubmit={handleSubmit}>
+              <TextField
+                required
+                fullWidth
+                id="withdrawAmount"
+                label="Withdraw Amount"
+                type="number"
+                value={withdrawAmount}
+                onChange={(e) => setWithdrawAmount(e.target.value)}
+                margin="normal"
+                variant="outlined"
+              />
+
+              <FormControl fullWidth margin="normal" variant="outlined">
+                <InputLabel id="wallet-label">Select Wallet</InputLabel>
+                <Select
+                  labelId="wallet-label"
+                  id="wallet"
+                  value={selectedWallet}
+                  onChange={handleWalletChange}
+                  label="Select Wallet"
+                >
+                  {wallets.map((wallet) => (
+                    <MenuItem key={wallet._id} value={wallet._id}>
+                      {wallet.gateway}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              <TextField
+                required
+                fullWidth
+                id="accountNumber"
+                label="Account Number"
+                value={accountNumber}
+                margin="normal"
+                variant="outlined"
+                disabled // Disable to prevent manual entry
+              />
+
+              <TextField
+                required
+                fullWidth
+                id="accountTitle"
+                label="Account Title"
+                value={accountTitle}
+                margin="normal"
+                variant="outlined"
+                disabled // Disable to prevent manual entry
+              />
+
+              <Box display="flex" justifyContent="center" sx={{ marginTop: 2 }}>
+                <Button type="submit" variant="contained" color="primary" disabled={!withdrawAmount || !selectedWallet}>
+                  Submit Withdraw Request
+                </Button>
+                <Button variant="outlined" onClick={handleAddWallet} sx={{ marginLeft: 2 }}>
+                  Add More Wallet
+                </Button>
+              </Box>
+            </form>
+          )}
 
           {errorMessage && (
             <Typography variant="h6" color="error.main" sx={{ marginTop: 2, textAlign: 'center' }}>
@@ -207,7 +218,6 @@ const WithdrawBalance = () => {
                 width: '70px',
                 height: '70px',
                 borderRadius: '50%',
-             
                 margin: '0 auto',
               }}>
                 <svg

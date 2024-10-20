@@ -15,6 +15,8 @@ const CardWrapper = styled(MainCard)(({ theme }) => ({
   color: '#fff',
   overflow: 'hidden',
   position: 'relative',
+  minHeight: '200px', // Ensure the content area has a minimum height
+  maxHeight: '200px',
   '&>div': {
     position: 'relative',
     zIndex: 5

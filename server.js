@@ -131,6 +131,10 @@ const userSchema = new mongoose.Schema(
         createdAt: { type: Date, default: Date.now },
       },
     ],
+    profilePicture: {
+      type: String, // URL or file path to the image
+      default: null
+    },
 
   },
   {
@@ -350,6 +354,7 @@ app.get('/api/users/:username', async (req, res) => {
       rank: user.rank,
       plan: user.plan,
       refPer: user.refPer,
+      phone: user.phoneNumber,
       refParentPer: user.refParentPer
     });
   } catch (error) {
@@ -620,6 +625,7 @@ app.get('/api/user/:username', async (req, res) => {
     }
 
     res.status(200).json({
+      phone: user.phoneNumber,
       balance: user.balance,
       totalPoints: user.totalPoints,
       advancePoints: user.advancePoints,
@@ -832,5 +838,102 @@ app.get('/api/users/product-profit-history/:username', async (req, res) => {
   } catch (error) {
     console.error('Error fetching product profit history:', error);
     res.status(500).json({ message: 'Failed to fetch product profit history' });
+  }
+});
+
+
+
+// Get Parent User Name
+app.get('/api/user/:userId/parent', async (req, res) => {
+  try {
+    // Find the user based on the provided username
+    const user = await User.findOne({ username: req.params.userId });
+    
+    // Check if the user exists
+    if (!user) {
+      return res.status(404).send('User not found');
+    }
+
+    // Check if the user has a parent ID
+    if (!user.parent) {
+      return res.status(404).send('No parent found for this user');
+    }
+
+    // Fetch the parent user details using the parent ID
+    const parent = await User.findById(user.parent).select('fullName username');
+
+    // Check if the parent exists
+    if (!parent) {
+      return res.status(404).send('Parent user not found');
+    }
+
+    // Return the parent's details
+    res.send({ parent });
+    
+  } catch (err) {
+    res.status(500).send(err);
+  }
+});
+
+// Multer storage configuration for profile pictures
+const profilePictureStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, path.join(__dirname, '../uploads/profile-pictures')); // Ensure correct path
+  },
+  filename: function (req, file, cb) {
+    const ext = path.extname(file.originalname);
+    cb(null, 'profile-' + Date.now() + ext); // Use a unique name for the profile picture
+  }
+});
+
+// Create the multer instance
+const profileUpload = multer({ storage: profilePictureStorage });
+
+
+// Your route for uploading profile pictures
+app.post('/api/user/:username/profile-picture', profileUpload.single('profilePicture'), (req, res) => {
+  const filePath = `uploads/profile-pictures/${req.file.filename}`; // Save as a relative path
+
+  // Save the file path in the user document in the database
+  User.findOneAndUpdate({ username: req.params.username }, { profilePicture: filePath }, { new: true })
+    .then(user => {
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      res.json({ user });
+    })
+    .catch(err => {
+      console.error('Error saving profile picture:', err);
+      res.status(500).json({ message: 'Error saving profile picture' });
+    });
+});
+
+
+// Route to update user information including the profile picture
+app.put('/api/user/:username', profileUpload.single('profilePicture'), async (req, res) => {
+  const { username } = req.params;
+  const { fullName, email, phone } = req.body;
+
+  try {
+    const updates = { fullName, email, phone };
+
+    if (req.file) {
+      updates.profilePicture = `uploads/profile-pictures/${req.file.filename}`; // Save as relative path
+    }
+
+    const user = await User.findOneAndUpdate({ username }, updates, { new: true });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.json({ message: 'User updated successfully', user });
+  } catch (error) {
+    if (error instanceof multer.MulterError) {
+      console.error('Multer Error:', error);
+      return res.status(400).json({ message: error.message });
+    }
+    console.error('Error updating user:', error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 });
