@@ -1,0 +1,156 @@
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import { Box, List, ListItem, ListItemText, Typography, Button, CircularProgress, Avatar } from '@mui/material';
+// material-ui
+import { styled } from '@mui/material/styles';
+// project imports
+import MainCard from 'ui-component/cards/MainCard';
+import { useAuth } from 'views/pages/authentication/AuthContext';
+
+// styles
+const CardWrapper = styled(MainCard)(({ theme }) => ({
+  overflow: 'hidden',
+  position: 'relative',
+  '&:after': {
+    content: '""',
+    position: 'absolute',
+    width: 210,
+    height: 210,
+    background: `linear-gradient(210.04deg, ${theme.palette.warning.dark} -50.94%, rgba(144, 202, 249, 0) 83.49%)`,
+    borderRadius: '50%',
+    top: -30,
+    right: -180
+  },
+  '&:before': {
+    content: '""',
+    position: 'absolute',
+    width: 210,
+    height: 210,
+    background: `linear-gradient(140.9deg, ${theme.palette.warning.dark} -14.02%, rgba(144, 202, 249, 0) 70.50%)`,
+    borderRadius: '50%',
+    top: -160,
+    right: -130
+  }
+}));
+
+const ProfileCard = () => {
+  const { username } = useAuth(); // Get the username from the auth context
+  const [files, setFiles] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [userData, setUserData] = useState({
+    fullName: '',
+    username: '',
+    profilePicture: '',
+    parentName: '' // Add a field for the parent's name
+  });
+
+  useEffect(() => {
+    fetchFiles();
+    if (username) {
+      fetchUserProfile();
+      fetchParentName(); // Fetch the parent name when the user profile is loaded
+    }
+  }, [username]);
+
+  const fetchFiles = async () => {
+    try {
+      const response = await axios.get(`${process.env.REACT_APP_API_HOST}/api/files`);
+      setFiles(response.data.files);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching files:', error);
+      setLoading(false);
+    }
+  };
+
+  const fetchUserProfile = async () => {
+    try {
+      const response = await axios.get(`${process.env.REACT_APP_API_HOST}/api/users/${username}`);
+      setUserData((prevData) => ({
+        ...prevData,
+        fullName: response.data.fullName,
+        username: response.data.username,
+        profilePicture: response.data.profilePicture,
+      }));
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+    }
+  };
+
+  const fetchParentName = async () => {
+    try {
+      const response = await axios.get(`${process.env.REACT_APP_API_HOST}/api/user/${username}/parent`);
+      setUserData((prevData) => ({
+        ...prevData,
+        parentName: response.data.parent.fullName || response.data.parent.username, // Use parent's fullName or username
+      }));
+      console.log(parentName);
+    } catch (error) {
+      console.error('Error fetching parent name:', error);
+    }
+  };
+  console.log(`${process.env.REACT_APP_API_HOST}/api/user/${username}/parent`);
+
+  const downloadFile = async (fileId) => {
+    try {
+      const response = await axios.get(`${process.env.REACT_APP_API_HOST}/api/download/${fileId}`, {
+        responseType: 'blob' // specify response type as blob
+      });
+      // create a temporary anchor element to trigger download
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', response.headers['content-disposition'].split(';')[1].trim().split('=')[1]); // extract filename from content-disposition header
+      document.body.appendChild(link);
+      link.click();s
+      link.parentNode.removeChild(link); // remove the link from the DOM once downloaded
+    } catch (error) {
+      console.error('Error downloading file:', error);
+    }
+  };
+
+  const handleEditProfile = () => {
+    // Logic to handle profile editing goes here
+    console.log("Edit Profile Clicked");
+  };
+
+  return (
+    <CardWrapper border={false} content={false}>
+      <Box sx={{ p: 2 }}>
+        {/* User Profile Section */}
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+          <Avatar
+            src={userData.profilePicture || '/path-to-default-avatar.jpg'} // Replace with default avatar path
+            alt={userData.username}
+            sx={{ width: 50, height: 50, mr: 2 }}
+          />
+          <Box>
+            <Typography variant="h6">{userData.fullName || userData.username}</Typography>
+            <Typography variant="body2" color="textSecondary">{userData.username}</Typography>
+            <Typography variant="body2" color="textSecondary">Referral: {userData.parentName || 'No Referral'}</Typography> {/* Updated to show "Referral" */}
+          </Box>
+        </Box>
+        <Button variant="contained" color="primary" onClick={handleEditProfile} sx={{ mb: 2 }}>
+          Edit Profile
+        </Button>
+
+        {loading ? (
+          <CircularProgress />
+        ) : (
+          <List>
+            {files.map((file) => (
+              <ListItem key={file._id}>
+                <ListItemText primary={file.filename} />
+                <Button variant="contained" color="primary" onClick={() => downloadFile(file._id)}>
+                  Download
+                </Button>
+              </ListItem>
+            ))}
+          </List>
+        )}
+      </Box>
+    </CardWrapper>
+  );
+};
+
+export default ProfileCard;
