@@ -7,7 +7,7 @@ const cors = require('cors');
 require('dotenv').config();
 
 const app = express();
-const PORT = process.env.PORT || 8000;
+const PORT = 8001;
 
 // ------------||Serve static files from the 'uploads' directory||----------------------
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
