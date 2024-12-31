@@ -1,12 +1,12 @@
 // assets
-import { IconUserPlus, IconMoodPlus, IconDeviceTabletUp, IconSend2 } from '@tabler/icons-react';
+import { IconUserPlus, IconMoodPlus, IconDeviceTabletUp, IconChecklist  } from '@tabler/icons-react';
 
 // constant
 const icons = {
   IconUserPlus,
   IconMoodPlus,
   IconDeviceTabletUp,
-  IconSend2
+  IconChecklist 
 };
 
 // ==============================|| EXTRA PAGES MENU ITEMS ||============================== //
@@ -38,11 +38,11 @@ const pages = {
       icon: icons.IconDeviceTabletUp
     },
     {
-      id: 'Money Transfer',
-      title: 'Money Transfer',
+      id: 'Task Center',
+      title: 'Task Center',
       type: 'item',
-      url: '/payments/money-transfer',
-      icon: icons.IconSend2
+      url: '/payments/task-center',
+      icon: icons.IconChecklist 
     }
   ]
 };

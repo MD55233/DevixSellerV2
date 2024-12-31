@@ -9,8 +9,8 @@ import {
   Paper,
   Typography,
   CircularProgress,
-  Grid,
   Box,
+  Grid,
 } from '@mui/material';
 import axios from 'axios';
 import { useAuth } from 'views/pages/authentication/AuthContext';
@@ -32,6 +32,7 @@ const TransactionHistory = () => {
           referralResponse,
           approvedReferralResponse,
           rejectedReferralResponse,
+          taskTransactionsResponse, // Fetching task transactions
         ] = await Promise.all([
           axios.get(`${process.env.REACT_APP_API_HOST}/api/withdrawals/${username}`),
           axios.get(`${process.env.REACT_APP_API_HOST}/api/training-bonus/${username}`),
@@ -40,6 +41,7 @@ const TransactionHistory = () => {
           axios.get(`${process.env.REACT_APP_API_HOST}/api/referral-payment/${username}`), // Referral payments
           axios.get(`${process.env.REACT_APP_API_HOST}/api/approvals/referral/approve/${username}`), // Approved referral payments
           axios.get(`${process.env.REACT_APP_API_HOST}/api/approvals/referral/reject/${username}`), // Rejected referral payments
+          axios.get(`${process.env.REACT_APP_API_HOST}/api/task-transactions/${username}`), // Fetching task transactions
         ]);
 
         // Combine all transaction types into a single array
@@ -67,6 +69,16 @@ const TransactionHistory = () => {
             type: 'Rejected Referral Payment',
             status: 'rejected',
             remarks: item.feedback || 'No feedback provided', // Include feedback in remarks for rejected payments
+          })),
+          ...taskTransactionsResponse.data.map(item => ({
+            ...item,
+            type: 'Task Transaction',
+            status: item.status,
+            amount: item.amount,
+            taskName: item.taskId.name,  // Add task name from populated taskId
+            accountNumber: '-',  // Placeholder
+            gateway: '-',  // Placeholder
+            remarks: item.description,
           })),
         ];
 
@@ -132,7 +144,7 @@ const TransactionHistory = () => {
                   <TableRow key={transaction._id}>
                     <TableCell>{new Date(transaction.createdAt).toLocaleDateString()}</TableCell>
                     <TableCell>{transaction.type}</TableCell>
-                    <TableCell>Rs,{transaction.transactionAmount || transaction.amount}</TableCell>
+                    <TableCell>Rs {transaction.amount}</TableCell>
                     <TableCell>
                       <Box sx={{
                         ...getStatusStyles(transaction.status),

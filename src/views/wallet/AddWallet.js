@@ -60,6 +60,8 @@ const AddWallet = () => {
               >
                 <MenuItem value="JazzCash">JazzCash</MenuItem>
                 <MenuItem value="Easypaisa">Easypaisa</MenuItem>
+                <MenuItem value="SadaPay">Al-Habib</MenuItem>
+                <MenuItem value="NayaPay">Al-Habib</MenuItem>
                 <MenuItem value="HBL">HBL</MenuItem>
                 <MenuItem value="UBL">UBL</MenuItem>
                 <MenuItem value="Meezan">Meezan</MenuItem>

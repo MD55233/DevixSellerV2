@@ -40,120 +40,293 @@ process.on('SIGINT', () => {
 app.use(bodyParser.json());
 app.use(cors());
 
+// User Model
 const userSchema = new mongoose.Schema(
   {
-    fullName: {
-      type: String,
-      required: true,
-      trim: true
+    fullName: { type: String, required: true, trim: true },
+    username: { type: String, required: true, unique: true, trim: true },
+    password: { type: String, required: true },
+    email: { type: String, required: true, unique: true, trim: true },
+    phoneNumber: { type: String, required: true },
+    accountType: { type: String, required: true }, // e.g., "Starter", "Pro", "Premium"
+    balance: { type: Number, default: 0 },
+    withdrawalBalance: { type: Number, default: 0 },
+    dailyTaskLimit: { type: Number, required: true },
+    lastCompletedDate: { type: Date, default: null },
+    tasksCompletedToday: { type: Number, default: 0 },
+    bonusBalance: { type: Number, default: 0 },
+    referralDetails: {
+      referralCode: { type: String, unique: true },
+      referrer: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
     },
-    username: {
-      type: String,
-      required: true,
-      unique: true,
-      trim: true
-    },
-    password: {
-      type: String,
-      required: true
-    },
-    email: {
-      type: String,
-      required: true,
-      unique: true,
-      trim: true
-    },
-    phoneNumber: {
-      type: String,
-      required: true
-    },
-    balance: {
-      type: Number,
-      default: 0
-    },
-    productprofitBalance: {
-      type: Number,
-      default: 0
-    },
-    advancePoints: {
-      type: Number,
-      default: 0
-    },
-    totalPoints: {
-      type: Number,
-      default: 0
-    },
-    directPoints: {
-      type: Number,
-      default: 0
-    },
-    indirectPoints: {
-      type: Number,
-      default: 0
-    },
-    trainingBonusBalance: {
-      type: Number,
-      default: 0
-    },
-    plan: {
-      type: String,
-      required: true
-    },
-    rank: {
-      type: String,
-      default: 'Buisness Member'
-    },
-    parent: {
-      type: mongoose.Schema.Types.ObjectId,
-      default: null
-    }, // Reference to the parent (referrer)
-    refPer: {
-      type: Number,
-      required: true
-    },
-    refParentPer: {
-      type: Number,
-      required: true
-    },
-    parentName: {
-      type: String,
-      default: 'Admin'
-    },
-    grandParentName: {
-      type: String,
-      default: 'Admin'
-    },
-    productProfitHistory: [
+    taskHistory: [
       {
+        taskId: { type: mongoose.Schema.Types.ObjectId, ref: 'Task' },
+        completedAt: { type: Date },
+        reward: { type: Number },
+      },
+    ],
+    transactionHistory: [
+      {
+        type: { type: String, required: true }, // "credit" or "debit"
         amount: { type: Number, required: true },
-        directPointsIncrement: { type: Number, required: true },
-        totalPointsIncrement: { type: Number, required: true },
+        description: { type: String, trim: true },
         createdAt: { type: Date, default: Date.now },
       },
     ],
-    profilePicture: {
-      type: String, // URL or file path to the image
-      default: null
-    },
-
+    commissionPendingTasks: [
+      {
+        taskId: { type: mongoose.Schema.Types.ObjectId, ref: 'Task' },
+        commissionAmount: { type: Number, required: true },
+        releaseDate: { type: Date, required: true },
+      },
+    ],
+    planActivationDate: { type: Date, default: null },
+    profilePicture: { type: String, default: null },
+    parent: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+    pendingCommission: { type: Number, default: 0 },
   },
-  {
-    timestamps: true // Automatically adds createdAt and updatedAt timestamps
-  }
+  { timestamps: true }
 );
 
-const User = mongoose.model('User', userSchema);
+const User = mongoose.model('User', userSchema);  // Define User model
 
-// -----------------------||Get full name of user||---------------------------
-app.get('/api/user/:userId', async (req, res) => {
+// Route to fetch all data of a user based on username
+app.get('/api/user/:username', async (req, res) => {
+  const { username } = req.params;
+
   try {
-    const user = await User.findOne({ username: req.params.userId });
+    // Find the user by username and populate related fields
+    const user = await User.findOne({ username })
+      .populate('taskHistory.taskId') // Populate task details
+      .populate('commissionPendingTasks.taskId') // Populate commission pending tasks
+      .exec();
+
     if (!user) {
-      return res.status(404).send('User not found');
+      return res.status(404).json({ error: 'User not found' });
     }
-    res.send({user});
-  } catch (err) {
-    res.status(500).send(err);
+
+    // Prepare the response with all relevant user data
+    const userData = {
+      _id: user._id,
+      fullName: user.fullName,
+      username: user.username,
+      email: user.email,
+      phoneNumber: user.phoneNumber,
+      accountType: user.accountType,
+      balance: user.balance,
+      withdrawalBalance: user.withdrawalBalance,
+      dailyTaskLimit: user.dailyTaskLimit,
+      tasksCompletedToday: user.tasksCompletedToday,
+      bonusBalance: user.bonusBalance,
+      referralDetails: user.referralDetails,
+      taskHistory: user.taskHistory,
+      transactionHistory: user.transactionHistory,
+      commissionPendingTasks: user.commissionPendingTasks,
+      planActivationDate: user.planActivationDate,
+      profilePicture: user.profilePicture,
+      parent: user.parent,
+      pendingCommission: user.pendingCommission,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    };
+
+    // Return the complete user data
+    res.status(200).json({ user: userData });
+
+  } catch (error) {
+    console.error('Error fetching user data:', error);
+    res.status(500).json({ error: 'Internal Server Error', details: error.message });
+  }
+});
+// Configure Multer for file uploads
+const fileStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, '../uploads/tasks');
+  },
+  filename: (req, file, cb) => {
+    cb(null, `${Date.now()}-${file.originalname}`);
+  },
+});
+
+const uploadFile = multer({ storage: fileStorage });
+
+// Task Schema
+const taskSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true },
+    description: { type: String, required: true },
+    reward: { type: Number, required: true },
+    image: { type: String }, // URL to the task image
+    completedCount: { type: Number, default: 0 }, 
+    createdAt: { type: Date, default: Date.now },
+  },
+  { timestamps: true }
+);
+
+const TaskModel = mongoose.model('Task', taskSchema);
+// TaskTransaction Schema with username
+const taskTransactionSchema = new mongoose.Schema(
+  {
+    username: {
+      type: String,
+      required: true
+    },
+    taskId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Task',
+      required: true
+    },
+    amount: {
+      type: Number,
+      required: true
+    },
+    status: {
+      type: String,
+      enum: ['pending', 'approved', 'rejected'],
+      default: 'pending'
+    },
+    description: {
+      type: String,
+      required: true
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now
+    },
+    transactionType: {
+      type: String,
+      enum: ['credit', 'debit'],
+      required: true
+    }
+  },
+  { timestamps: true }
+);
+const TaskTransaction = mongoose.model('TaskTransaction', taskTransactionSchema);
+// Routes
+// Fetch all tasks
+app.get('/api/tasks', async (req, res) => {
+  try {
+    const tasks = await TaskModel.find();
+    res.status(200).json({ tasks });
+  } catch (error) {
+    console.error('Error fetching tasks:', error);
+    res.status(500).json({ error: 'Internal Server Error', details: error.message });
+  }
+});
+app.post('/api/tasks/:taskId/complete', async (req, res) => {
+  const { taskId } = req.params;
+  const { username } = req.body;
+
+  // Validate username
+  if (!username || typeof username !== 'string') {
+    return res.status(400).json({ error: 'Invalid username' });
+  }
+
+  try {
+    // Find the user by username
+    const user = await User.findOne({ username: username });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const today = new Date().toISOString().split('T')[0]; // Today's date in YYYY-MM-DD format
+    const lastCompletedDate = user.lastCompletedDate
+      ? user.lastCompletedDate.toISOString().split('T')[0]
+      : null;
+
+    // Reset daily tasks if it's a new day
+    if (lastCompletedDate !== today) {
+      user.tasksCompletedToday = 0;
+      user.lastCompletedDate = new Date();
+    }
+
+    // Check if the user has exceeded their daily task limit
+    if (user.tasksCompletedToday >= user.dailyTaskLimit) {
+      return res.status(400).json({ error: 'Daily task limit reached. Please try again tomorrow.' });
+    }
+
+    // Find the task
+    const task = await TaskModel.findById(taskId);
+    if (!task) {
+      return res.status(404).json({ error: 'Task not found' });
+    }
+
+    // Increment the user's task completion count for the day
+    user.tasksCompletedToday += 1;
+
+    // Update the user's pending commission
+    user.pendingCommission += task.reward;
+
+    // Increment the task completion count
+    task.completedCount = (task.completedCount || 0) + 1;
+
+    // Create a TaskTransaction record
+    const transaction = new TaskTransaction({
+      username: username,
+      taskId: task._id,
+      amount: task.reward,
+      status: 'pending', // Transaction status is pending initially
+      description: `Completed task: ${task.name}`,
+      transactionType: 'credit', // Credit for task completion
+    });
+
+    // Save the TaskTransaction, task, and user
+    await transaction.save();
+    await task.save();
+    await user.save();
+
+    // Respond with success message
+    res.status(200).json({
+      message: 'Task completed successfully',
+      tasksCompletedToday: user.tasksCompletedToday,
+      balance: user.pendingCommission,
+      task: {
+        id: task._id,
+        name: task.name,
+        reward: task.reward,
+      },
+    });
+  } catch (error) {
+    console.error('Error completing task:', error);
+    res.status(500).json({ error: 'Internal Server Error', details: error.message });
+  }
+});
+
+
+// Create a new task with an image upload
+app.post('/api/tasks', uploadFile.single('image'), async (req, res) => {
+  const { name, description, reward } = req.body;
+  const image = req.file ? req.file.path : null;
+
+  try {
+    const newTask = new TaskModel({ name, description, reward, image });
+    await newTask.save();
+    res.status(201).json({ message: 'Task created successfully', task: newTask });
+  } catch (error) {
+    console.error('Error creating task:', error);
+    res.status(500).json({ error: 'Internal Server Error', details: error.message });
+  }
+});
+
+// Fetch Task Transactions for a specific user
+app.get('/api/task-transactions/:username', async (req, res) => {
+  const { username } = req.params;
+
+  try {
+    // Find all task transactions for the given username
+    const taskTransactions = await TaskTransaction.find({ username })
+      .populate('taskId', 'name')  // Populate task name from Task model
+      .sort({ createdAt: -1 }); // Sort by most recent transaction
+
+    if (!taskTransactions) {
+      return res.status(404).json({ message: 'No transactions found for this user.' });
+    }
+
+    res.status(200).json(taskTransactions);
+  } catch (error) {
+    console.error('Error fetching task transactions:', error);
+    res.status(500).json({ message: 'Internal server error while fetching task transactions.' });
   }
 });
 
@@ -530,6 +703,47 @@ app.post('/api/user-accounts/add', async (req, res) => {
     res.status(500).json({ error: 'Failed to add account.' });
   }
 });
+// ------------------||PUT route to edit user payment account||------------------------
+app.put('/api/user-accounts/edit/:id', async (req, res) => {
+  const { id } = req.params; // Account ID
+  const { gateway, accountNumber, accountTitle } = req.body;
+
+  try {
+    // Find and update the account details by ID
+    const updatedAccount = await UserAccounts.findByIdAndUpdate(
+      id,
+      { gateway, accountNumber, accountTitle },
+      { new: true, runValidators: true } // Return the updated document and validate the input
+    );
+
+    if (!updatedAccount) {
+      return res.status(404).json({ message: 'Account not found.' });
+    }
+
+    res.status(200).json({ message: 'Account updated successfully.', account: updatedAccount });
+  } catch (error) {
+    console.error('Error updating account:', error);
+    res.status(500).json({ error: 'Failed to update account.' });
+  }
+});
+// ------------------||DELETE route to remove user payment account||------------------------
+app.delete('/api/user-accounts/delete/:id', async (req, res) => {
+  const { id } = req.params; // Account ID
+
+  try {
+    // Find and delete the account by ID
+    const deletedAccount = await UserAccounts.findByIdAndDelete(id);
+
+    if (!deletedAccount) {
+      return res.status(404).json({ message: 'Account not found.' });
+    }
+
+    res.status(200).json({ message: 'Account deleted successfully.', account: deletedAccount });
+  } catch (error) {
+    console.error('Error deleting account:', error);
+    res.status(500).json({ error: 'Failed to delete account.' });
+  }
+});
 
 // ]-------------------||GET route to fetch user accounts by username||----------------------[
 
@@ -779,32 +993,44 @@ const withdrawalRequestSchema = new mongoose.Schema(
 const WithdrawalRequest = mongoose.model('WithdrawalRequest', withdrawalRequestSchema);
 
 // Submit a withdrawal request (User Side - No remarks, status is 'pending')
-// Submit a withdrawal request (User Side - No balance deduction, status is 'pending')
+// Submit a withdrawal request (User Side - Balance validation included)
 app.post('/api/withdraw-balance', async (req, res) => {
   const { username, withdrawAmount, gateway, accountNumber, accountTitle } = req.body;
 
   try {
+    // Find the user by username
     const user = await User.findOne({ username });
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Create and save new withdrawal request (No balance deduction here)
+    // Check if the user's balance is sufficient
+    if (user.balance < withdrawAmount) {
+      return res.status(400).json({ message: 'Insufficient balance for withdrawal.' });
+    }
+
+    // Create and save new withdrawal request (Balance not deducted here, status is pending)
     const newWithdrawalRequest = new WithdrawalRequest({
       userId: user._id,
       amount: withdrawAmount,
       accountNumber,
       accountTitle,
-      gateway
+      gateway,
+      status: 'pending', // Status is pending by default
+      createdAt: new Date(), // Optional: track request creation time
     });
     await newWithdrawalRequest.save();
 
-    res.status(200).json({ message: 'Withdrawal request submitted successfully.', requestId: newWithdrawalRequest._id });
+    res.status(200).json({ 
+      message: 'Withdrawal request submitted successfully.', 
+      requestId: newWithdrawalRequest._id 
+    });
   } catch (error) {
     console.error('Error processing withdrawal request:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
+
 
 // Fetch withdrawal requests (Transactions) for the user
 app.get('/api/withdrawals/:username', async (req, res) => {
@@ -912,10 +1138,10 @@ app.post('/api/user/:username/profile-picture', profileUpload.single('profilePic
 // Route to update user information including the profile picture
 app.put('/api/user/:username', profileUpload.single('profilePicture'), async (req, res) => {
   const { username } = req.params;
-  const { fullName, email, phone } = req.body;
+  const { fullName, email, phoneNumber } = req.body;
 
   try {
-    const updates = { fullName, email, phone };
+    const updates = { fullName, email, phoneNumber };
 
     if (req.file) {
       updates.profilePicture = `uploads/profile-pictures/${req.file.filename}`; // Save as relative path

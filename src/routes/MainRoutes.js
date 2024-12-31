@@ -13,13 +13,16 @@ const UploadTraningBonus = Loadable(lazy(() => import('views/pages/training-bonu
 const Invest = Loadable(lazy(() => import('views/pages/invest/Invest')));
 const ReferralPaymentVerification = Loadable(lazy(() => import('views/pages/invest/ReferralPaymentVerification')));
 const WithDraw = Loadable(lazy(() => import('views/pages/WithDraw')));
-const MoneyTransfer = Loadable(lazy(() => import('views/pages/MoneyTransfer')));
+const TaskCenter = Loadable(lazy(() => import('views/pages/TaskCenter')));
+const TaskTransactionHistory = Loadable(lazy(() => import('views/pages/tasks')));
 // Transaction routing
 const AllTransaction = Loadable(lazy(() => import('views/utilities/AllTransaction')));
 const DepositHistory = Loadable(lazy(() => import('views/utilities/DepositHistory')));
 const WithdrawHistory = Loadable(lazy(() => import('views/utilities/WithdrawHistory')));
 const TrainingBonusHistory = Loadable(lazy(() => import('views/utilities/TrainingBonusHistory')));
 const ProductHistory = Loadable(lazy(() => import('views/utilities/ProductHistory')));
+const More = Loadable(lazy(() => import('views/utilities/more')));
+const UserInfoPage = Loadable(lazy(() => import('views/utilities/UserInfoPage')));
 // Wallet routing
 const Wallet = Loadable(lazy(() => import('views/wallet/Wallet')));
 const AddWallet = Loadable(lazy(() => import('views/wallet/AddWallet')));
@@ -44,12 +47,40 @@ const MainRoutes = {
         }
       ]
     },
+
     {
       path: 'Transactions',
       children: [
         {
           path: 'all-transactions',
           element: <AllTransaction />
+        }
+      ]
+    },
+    {
+      path: 'utilities',
+      children: [
+        {
+          path: 'more',
+          element: <More />
+        }
+      ]
+    },
+    {
+      path: 'utilities',
+      children: [
+        {
+          path: 'userInfoPage',
+          element: <UserInfoPage />
+        }
+      ]
+    },
+    {
+      path: 'Transactions',
+      children: [
+        {
+          path: 'task-transactions',
+          element: <TaskTransactionHistory />
         }
       ]
     },
@@ -140,8 +171,8 @@ const MainRoutes = {
           element: <WithDraw />
         },
         {
-          path: 'money-transfer',
-          element: <MoneyTransfer />
+          path: 'task-center',
+          element: <TaskCenter />
         }
       ]
     },

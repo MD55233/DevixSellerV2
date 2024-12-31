@@ -48,7 +48,7 @@ const TotalIncomeLightCard = () => {
     fullName: '',
     username: '',
     email: '',
-    phone: '',
+    phoneNumber: '',
     profilePicture: '',
     referredBy: '',
   });
@@ -129,7 +129,7 @@ const TotalIncomeLightCard = () => {
       }
 
       // Make the request only if formData has entries
-      if (formData.has('fullName') || formData.has('email') || formData.has('phone') || formData.has('profilePicture')) {
+      if (formData.has('fullName') || formData.has('email') || formData.has('phoneNumber') || formData.has('profilePicture')) {
         const response = await axios.put(`${process.env.REACT_APP_API_HOST}/api/user/${username}`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
@@ -141,7 +141,7 @@ const TotalIncomeLightCard = () => {
         setUpdatedData({ // Reset updated data to the latest user data
           fullName: response.data.user.fullName,
           email: response.data.user.email,
-          phone: response.data.user.phone,
+          phoneNumber: response.data.user.phoneNumber,
           profilePicture: '', // Reset to empty for the file input
         });
         handleModalClose();
@@ -191,7 +191,7 @@ const TotalIncomeLightCard = () => {
           <TextField
             label="Phone"
             name="phone"
-            value={updatedData.phone}
+            value={updatedData.phoneNumber}
             onChange={handleInputChange}
             fullWidth
             margin="normal"

@@ -124,6 +124,8 @@ const ReferralPaymentVerification = () => {
               >
                 <MenuItem value="JazzCash">JazzCash</MenuItem>
                 <MenuItem value="Easypaisa">Easypaisa</MenuItem>
+                <MenuItem value="NayaPay">Bank Transfer</MenuItem>
+                <MenuItem value="SadaPay">Bank Transfer</MenuItem>
                 <MenuItem value="Bank Transfer">Bank Transfer</MenuItem>
               </Select>
             </FormControl>

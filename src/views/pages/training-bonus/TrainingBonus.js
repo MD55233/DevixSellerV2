@@ -13,7 +13,7 @@ const CardContent = styled('div')(({ theme }) => ({
 }));
 
 const InnerCard = styled(Card)(({ theme }) => ({
-  backgroundColor: '#a256f8',
+  backgroundColor: '#87E0A3',
   padding: theme.spacing(2),
   width: '100%', // Ensures the inner card stretches to full width
   display: 'flex',

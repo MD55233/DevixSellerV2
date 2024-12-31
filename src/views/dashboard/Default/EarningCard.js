@@ -3,146 +3,125 @@ import axios from 'axios';
 import { useAuth } from 'views/pages/authentication/AuthContext';
 import { useState, useEffect } from 'react';
 // material-ui
-import { styled, useTheme } from '@mui/material/styles';
-import { Avatar, Box, Grid, Typography } from '@mui/material';
-
-// project imports
-import MainCard from 'ui-component/cards/MainCard';
-import SkeletonEarningCard from 'ui-component/cards/Skeleton/EarningCard';
-
-// assets
-import EarningIcon from 'assets/images/icons/earning.svg';
-import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
-
-const CardWrapper = styled(MainCard)(({ theme }) => ({
-  backgroundColor: theme.palette.secondary.dark,
-  color: '#fff',
-  overflow: 'hidden',
-  position: 'relative',
-  '&:after': {
-    content: '""',
-    position: 'absolute',
-    width: 210,
-    height: 210,
-    background: theme.palette.secondary[800],
-    borderRadius: '50%',
-    top: -85,
-    right: -95,
-    [theme.breakpoints.down('sm')]: {
-      top: -105,
-      right: -140
-    }
-  },
-  '&:before': {
-    content: '""',
-    position: 'absolute',
-    width: 210,
-    height: 210,
-    background: theme.palette.secondary[800],
-    borderRadius: '50%',
-    top: -125,
-    right: -15,
-    opacity: 0.5,
-    [theme.breakpoints.down('sm')]: {
-      top: -155,
-      right: -70
-    }
-  }
-}));
-
-// ===========================|| DASHBOARD DEFAULT - EARNING CARD ||=========================== //
+import { Grid, Typography, Card, Avatar } from '@mui/material';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
 const EarningCard = ({ isLoading }) => {
-  const theme = useTheme();
   const [balance, setBalance] = useState(0);
-  const { username } = useAuth();
+  const [pendingCommission, setPendingCommission] = useState(0);
+  const [profilePicture, setProfilePicture] = useState(null); // State to store profile picture URL
+  const { username, fullName } = useAuth();
 
   useEffect(() => {
-    const fetchUserBalance = async () => {
+    const fetchUserData = async () => {
       try {
         const response = await axios.get(`${process.env.REACT_APP_API_HOST}/api/user/${username}`);
         setBalance(response.data.user.balance);
+        setPendingCommission(response.data.user.pendingCommission || 0);
+        setProfilePicture(response.data.user.profilePicture); // Fetch profile picture URL
       } catch (error) {
-        console.error('Error fetching user balance:', error);
+        console.error('Error fetching user data:', error);
       }
     };
 
     if (username) {
-      fetchUserBalance();
+      fetchUserData();
     }
   }, [username]);
-  const totalBalance = balance.toString();
 
   return (
     <>
       {isLoading ? (
-        <SkeletonEarningCard />
+        <div>Loading...</div>
       ) : (
-        <CardWrapper border={false} content={false}>
-          <Box sx={{ p: 2.25 }}>
-            <Grid container direction="column">
-              <Grid item>
-                <Grid container justifyContent="space-between">
-                  <Grid item>
-                    <Avatar
-                      variant="rounded"
-                      sx={{
-                        ...theme.typography.commonAvatar,
-                        ...theme.typography.largeAvatar,
-                        backgroundColor: theme.palette.secondary[800],
-                        mt: 1
-                      }}
-                    >
-                      <img src={EarningIcon} alt="Notification" />
-                    </Avatar>
-                  </Grid>
-                  <Grid item>
-                    <Avatar
-                      variant="rounded"
-                      sx={{
-                        ...theme.typography.commonAvatar,
-                        ...theme.typography.mediumAvatar,
-                        backgroundColor: theme.palette.secondary.dark,
-                        color: theme.palette.secondary[200],
-                        zIndex: 1
-                      }}
-                      aria-controls="menu-earning-card"
-                      aria-haspopup="true"
-                    >
-                      <MoreHorizIcon fontSize="inherit" />
-                    </Avatar>
-                  </Grid>
-                </Grid>
-              </Grid>
-              <Grid item>
-                <Grid container alignItems="center">
-                  <Grid item>
-                    <Typography sx={{ fontSize: '2rem', fontWeight: 500, mr: 1, mt: 1.75, mb: 0.75 }}>PKR {totalBalance}</Typography>
-                  </Grid>
-                  <Grid item></Grid>
-                </Grid>
-              </Grid>
-              <Grid item sx={{ mb: 1.25 }}>
-                <Typography
-                  sx={{
-                    fontSize: '1rem',
-                    fontWeight: 500,
-                    color: theme.palette.secondary[200]
-                  }}
-                >
-                  Available Balance
-                </Typography>
-              </Grid>
+        <Card
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderRadius: '16px',
+            background: 'linear-gradient(270deg,rgb(191, 255, 240) -20%, #FFFFFF 30%)',
+            boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)',
+            padding: '24px',
+          }}
+        >
+          {/* Avatar Section */}
+          <Avatar
+            sx={{ width: 64, height: 64, marginBottom: '12px' }}
+            src={profilePicture ? `${process.env.REACT_APP_API_HOST}/${profilePicture}` : null} // Show profile picture if available
+          >
+            {!profilePicture && <AccountCircleIcon sx={{ fontSize: '2.5rem', color: '#FFFFFF' }} />} {/* Fallback to default icon */}
+          </Avatar>
+
+          <Typography
+            sx={{
+              fontSize: '1.125rem',
+              fontWeight: 600,
+              color: '#333',
+              marginBottom: '16px',
+            }}
+          >
+            {fullName || 'Name Surname'}
+          </Typography>
+
+          {/* Divider Line */}
+          <hr style={{ width: '100%', border: '0.5px solid #E0E0E0', margin: '12px 0' }} />
+
+          {/* Balance and Expenses Section */}
+          <Grid container justifyContent="space-between" alignItems="center" spacing={2} sx={{ width: '100%' }}>
+            <Grid item xs={6} textAlign="center">
+              <Typography
+                sx={{
+                  fontSize: '0.875rem',
+                  fontWeight: 400,
+                  color: '#2CB693',
+                  marginBottom: '4px',
+                }}
+              >
+                Pending Commission
+              </Typography>
+              <Typography
+                sx={{
+                  fontSize: '1.5rem',
+                  fontWeight: 700,
+                  color: '#2CB693',
+                }}
+              >
+                Rs {pendingCommission.toFixed(2)}
+              </Typography>
             </Grid>
-          </Box>
-        </CardWrapper>
+
+            <Grid item xs={6} textAlign="center">
+              <Typography
+                sx={{
+                  fontSize: '0.875rem',
+                  fontWeight: 400,
+                  color: '#2CB693',
+                  marginBottom: '4px',
+                }}
+              >
+                Balance
+              </Typography>
+              <Typography
+                sx={{
+                  fontSize: '1.5rem',
+                  fontWeight: 700,
+                  color: '#2CB693',
+                }}
+              >
+                Rs {balance.toFixed(2)}
+              </Typography>
+            </Grid>
+          </Grid>
+        </Card>
       )}
     </>
   );
 };
 
 EarningCard.propTypes = {
-  isLoading: PropTypes.bool
+  isLoading: PropTypes.bool,
 };
 
 export default EarningCard;

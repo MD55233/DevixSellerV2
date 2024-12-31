@@ -1,8 +1,8 @@
 {
-  "name": "fairyglow-seller",
+  "name": "laikostar-seller",
   "version": "3.3.2",
   "private": true,
-  "homepage": "https://fairyglow.org",
+  "homepage": "https://laikostar.com",
   "dependencies": {
     "@emotion/cache": "^11.9.3",
     "@emotion/react": "^11.11.1",
