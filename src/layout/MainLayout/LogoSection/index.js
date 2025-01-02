@@ -6,7 +6,7 @@ import { ButtonBase, Typography, Box } from '@mui/material';
 
 // project imports
 import config from 'config';
-import laikostarberry from 'assets/images/fairyglowberry.svg'; // Adjust the path to where your SVG file is located
+import likostarlogo from 'assets/images/likostarlogo.png'; // Adjust the path to where your SVG file is located
 import { MENU_OPEN } from 'store/actions';
 
 // ==============================|| MAIN LOGO ||============================== //
@@ -26,20 +26,22 @@ const LogoSection = () => {
       <Box sx={{ mt: 1, mr: 0.5 }}>
         {' '}
         {/* Add top margin to logo and reduce right margin */}
-        <img src={laikostarberry} alt="Logo" width="92" height="32" />
+        
       </Box>
       <Box sx={{ display: 'flex' }}>
+      <img src={likostarlogo} alt="Logo" width="32" height="32" />
         <Typography
           variant="h6"
           sx={{
             fontFamily: 'Museo Sans',
             fontWeight: 700,
             fontSize: 18,
-            ml: -4,
+            ml: 1,
+            mt:0.5,
             color: 'secondary.main'
           }}
         >
-          Fairy
+          Laiko
         </Typography>
         <Typography
           variant="h6"
@@ -47,12 +49,13 @@ const LogoSection = () => {
             fontFamily: 'Museo Sans',
             fontWeight: 300,
             fontSize: 18,
-            color: 'primary.main',
+            color: '#2CB693',
             ml: 0,
-            mr: 3
+            mr: 3,
+            mt: 0.5
           }}
         >
-          Glow
+          Star
         </Typography>
       </Box>
     </ButtonBase>

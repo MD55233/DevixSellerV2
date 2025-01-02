@@ -3,11 +3,11 @@ import { styled } from '@mui/material/styles';
 import {
   Avatar,
   Divider,
-  Grid,
+
   List,
   ListItem,
   ListItemAvatar,
-  ListItemSecondaryAction,
+
   ListItemText,
   Typography
 } from '@mui/material';
@@ -70,24 +70,30 @@ const NotificationList = () => {
             <ListItemAvatar>
               <Avatar alt="User" src={User1} />
             </ListItemAvatar>
-            <ListItemText 
-              primary={<Typography variant="subtitle1" noWrap>{notification.message}</Typography>} 
-              secondary={
-                <Typography variant="caption">
-                  {new Date(notification.timestamp).toLocaleTimeString()}
-                </Typography>
-              }
-              sx={{ flexGrow: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}
-            />
-            <ListItemSecondaryAction>
-              <Grid container justifyContent="flex-end">
-                <Grid item>
-                  <Typography variant="caption" display="block" gutterBottom>
-                    {new Date(notification.timestamp).toLocaleTimeString()}
-                  </Typography>
-                </Grid>
-              </Grid>
-            </ListItemSecondaryAction>
+            <ListItemText
+  primary={
+    <Typography 
+      variant="subtitle1" 
+      noWrap={false} 
+      sx={{
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'normal', // Allow text to wrap to the next line
+        wordWrap: 'break-word', // Break long words if needed
+        maxWidth: '250px', // Set a fixed width for the text box
+      }}
+    >
+      {notification.message}
+    </Typography>
+  }
+  secondary={
+    <Typography variant="caption">
+      {new Date(notification.timestamp).toLocaleTimeString()}
+    </Typography>
+  }
+/>
+
+           
           </ListItem>
           <Divider />
         </ListItemWrapper>

@@ -9,7 +9,7 @@ import {
   Button,
   ButtonBase,
   CardActions,
-  Chip,
+ 
   ClickAwayListener,
   Divider,
   Grid,
@@ -123,95 +123,116 @@ const NotificationSection = () => {
           </Avatar>
         </ButtonBase>
       </Box>
-      <Popper
-        placement={matchesXs ? 'bottom' : 'bottom-end'}
-        open={open}
-        anchorEl={anchorRef.current}
-        role={undefined}
-        transition
-        disablePortal
-        popperOptions={{
-          modifiers: [
-            {
-              name: 'offset',
-              options: {
-                offset: [matchesXs ? 5 : 0, 20]
-              }
-            }
-          ]
-        }}
-      >
-        {({ TransitionProps }) => (
-          <Transitions position={matchesXs ? 'top' : 'top-right'} in={open} {...TransitionProps}>
-            <Paper>
-              <ClickAwayListener onClickAway={handleClose}>
-                <MainCard border={false} elevation={16} content={false} boxShadow shadow={theme.shadows[16]}>
+ <Popper
+  placement={matchesXs ? 'bottom' : 'bottom-end'}
+  open={open}
+  anchorEl={anchorRef.current}
+  role={undefined}
+  transition
+  disablePortal
+  popperOptions={{
+    modifiers: [
+      {
+        name: 'offset',
+        options: {
+          offset: [matchesXs ? 5 : 0, 20] // Adjust the offset if necessary
+        }
+      },
+      {
+        name: 'preventOverflow',
+        options: {
+          boundary: 'viewport', // Prevents overflow from the viewport
+        }
+      },
+      {
+        name: 'flip',
+        options: {
+          fallbackPlacements: ['bottom', 'bottom-start', 'bottom-end'], // Flips the placement if there's no space
+        }
+      }
+    ]
+  }}
+  style={{
+    zIndex: 1300, // Ensure it's above other elements
+    maxWidth: '90vw', // Constrain the width to prevent overflow
+  }}
+>
+  {({ TransitionProps }) => (
+    <Transitions position={matchesXs ? 'top' : 'top-right'} in={open} {...TransitionProps}>
+      <Paper   sx={{
+    maxWidth: '320px', // Restrict the overall width of the notification container
+    maxHeight: '80vh',
+    overflow: 'auto',
+  }}>
+        <ClickAwayListener onClickAway={handleClose}>
+          <MainCard border={false} elevation={16} content={false} boxShadow shadow={theme.shadows[16]}>
+            <Grid container direction="column" spacing={2}>
+              <Grid item xs={12}>
+                <Grid container alignItems="center" justifyContent="space-between" sx={{ pt: 2, px: 2 }}>
+                  <Grid item>
+                    <Stack direction="row" spacing={2}>
+                      <Typography sx={{ marginRight: 4 }} variant="subtitle1">
+                        All Notification
+                      </Typography>
+                    </Stack>
+                  </Grid>
+                  <Grid item>
+                    <Typography
+                      sx={{ marginLeft: 4 }}
+                      component={Link}
+                      to="#"
+                      variant="subtitle2"
+                      color="primary"
+                    >
+                      Mark as all read
+                    </Typography>
+                  </Grid>
+                </Grid>
+              </Grid>
+              <Grid item xs={12}>
+                <PerfectScrollbar style={{ height: '100%', maxHeight: 'calc(100vh - 205px)', overflowX: 'hidden' }}>
                   <Grid container direction="column" spacing={2}>
                     <Grid item xs={12}>
-                      <Grid container alignItems="center" justifyContent="space-between" sx={{ pt: 2, px: 2 }}>
-                        <Grid item>
-                          <Stack direction="row" spacing={2}>
-                            <Typography variant="subtitle1">All Notification</Typography>
-                            <Chip
-                              size="small"
-                              label="01"
-                              sx={{
-                                color: theme.palette.background.default,
-                                bgcolor: theme.palette.warning.dark
-                              }}
-                            />
-                          </Stack>
-                        </Grid>
-                        <Grid item>
-                          <Typography component={Link} to="#" variant="subtitle2" color="primary">
-                            Mark as all read
-                          </Typography>
-                        </Grid>
-                      </Grid>
+                      <Box sx={{ px: 2, pt: 0.25 }}>
+                        <TextField
+                          id="outlined-select-currency-native"
+                          select
+                          fullWidth
+                          value={value}
+                          onChange={handleChange}
+                          SelectProps={{
+                            native: true
+                          }}
+                        >
+                          {status.map((option) => (
+                            <option key={option.value} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </TextField>
+                      </Box>
                     </Grid>
-                    <Grid item xs={12}>
-                      <PerfectScrollbar style={{ height: '100%', maxHeight: 'calc(100vh - 205px)', overflowX: 'hidden' }}>
-                        <Grid container direction="column" spacing={2}>
-                          <Grid item xs={12}>
-                            <Box sx={{ px: 2, pt: 0.25 }}>
-                              <TextField
-                                id="outlined-select-currency-native"
-                                select
-                                fullWidth
-                                value={value}
-                                onChange={handleChange}
-                                SelectProps={{
-                                  native: true
-                                }}
-                              >
-                                {status.map((option) => (
-                                  <option key={option.value} value={option.value}>
-                                    {option.label}
-                                  </option>
-                                ))}
-                              </TextField>
-                            </Box>
-                          </Grid>
-                          <Grid item xs={12} p={0}>
-                            <Divider sx={{ my: 0 }} />
-                          </Grid>
-                        </Grid>
-                        <NotificationList  />
-                      </PerfectScrollbar>
+                    <Grid item xs={12} p={0}>
+                      <Divider sx={{ my: 0 }} />
                     </Grid>
                   </Grid>
-                  <Divider />
-                  <CardActions sx={{ p: 1.25, justifyContent: 'center' }}>
-                    <Button size="small" disableElevation>
-                      View All
-                    </Button>
-                  </CardActions>
-                </MainCard>
-              </ClickAwayListener>
-            </Paper>
-          </Transitions>
-        )}
-      </Popper>
+                  <NotificationList />
+                </PerfectScrollbar>
+              </Grid>
+            </Grid>
+            <Divider />
+            <CardActions sx={{ p: 1.25, justifyContent: 'center' }}>
+              <Button size="small" disableElevation>
+                View All
+              </Button>
+            </CardActions>
+          </MainCard>
+        </ClickAwayListener>
+      </Paper>
+    </Transitions>
+  )}
+</Popper>
+
     </>
   );
 };

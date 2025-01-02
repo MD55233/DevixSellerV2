@@ -23,9 +23,9 @@ import PerfectScrollbar from 'react-perfect-scrollbar';
 import { useAuth } from 'views/pages/authentication/AuthContext';
 import MainCard from 'ui-component/cards/MainCard';
 import Transitions from 'ui-component/extended/Transitions';
-import User1 from 'assets/images/users/user-round.svg';
-import { IconLogout, IconSettings } from '@tabler/icons';
 
+import { IconLogout, IconSettings } from '@tabler/icons';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 const ProfileSection = () => {
   const theme = useTheme();
   const customization = useSelector((state) => state.customization);
@@ -33,6 +33,7 @@ const ProfileSection = () => {
   const { username, setAuthenticatedUsername } = useAuth();
 
   const [userData, setUserData] = useState(null);
+  const [profilePicture, setProfilePicture] = useState(null);
   const [selectedIndex] = useState(-1);
   const [open, setOpen] = useState(false);
   const anchorRef = useRef(null);
@@ -42,6 +43,7 @@ const ProfileSection = () => {
       try {
         const response = await axios.get(`${process.env.REACT_APP_API_HOST}/api/user/${username}`);
         setUserData(response.data.user);
+        setProfilePicture(response.data.user.profilePicture); 
       } catch (error) {
         console.error('Error fetching user balance:', error);
       }
@@ -110,17 +112,11 @@ const ProfileSection = () => {
         }}
         icon={
           <Avatar
-            src={User1}
-            sx={{
-              ...theme.typography.mediumAvatar,
-              margin: '8px 0 8px 8px !important',
-              cursor: 'pointer'
-            }}
-            ref={anchorRef}
-            aria-controls={open ? 'menu-list-grow' : undefined}
-            aria-haspopup="true"
-            color="inherit"
-          />
+            sx={{ width: 48, height: 48, cursor: 'pointer' }}
+            src={profilePicture ? `${process.env.REACT_APP_API_HOST}/${profilePicture}` : null} // Use profile picture if available
+          >
+            {!profilePicture && <AccountCircleIcon sx={{ fontSize: '2rem', color: '#FFFFFF' }} />} {/* Fallback icon */}
+          </Avatar>
         }
         label={<IconSettings stroke={1.5} size="1.5rem" color={theme.palette.primary.main} />}
         variant="outlined"

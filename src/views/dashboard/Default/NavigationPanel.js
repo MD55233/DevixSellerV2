@@ -53,7 +53,7 @@ const NavigationPanel = () => {
         />
       </Grid>
       <Grid item xs={6} sm={4} md={3}>
-        <NavigationCard title="Settings" icon={SettingsIcon} onClick={() => handleNavigation('settings')} />
+        <NavigationCard title="Settings" icon={SettingsIcon} onClick={() => handleNavigation('password-change')} />
       </Grid>
       <Grid item xs={6} sm={4} md={3}>
         <NavigationCard title="Add Referral" icon={EmojiEventsIcon} onClick={() => handleNavigation('payments/referral/plans')} />
