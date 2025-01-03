@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
@@ -9,51 +9,41 @@ import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import { styled } from '@mui/material/styles';
-import { useState } from 'react';
 import { useNavigate } from 'react-router';
+import { GoogleLogin } from '@react-oauth/google';
 
 const CustomTextField = styled(TextField)({
   '& .MuiOutlinedInput-root': {
     '& fieldset': {
       borderRadius: '20px',
-      borderColor: '#8e44ad' // Purple berry color
+      borderColor: '#8e44ad', // Purple berry color
     },
     '&:hover fieldset': {
-      borderColor: '#8e44ad'
+      borderColor: '#8e44ad',
     },
     '&.Mui-focused fieldset': {
-      borderColor: '#8e44ad'
-    }
-  }
+      borderColor: '#8e44ad',
+    },
+  },
 });
 
 export default function SignUpForm() {
   const [errorMessage, setErrorMessage] = useState('');
   const [formErrors, setFormErrors] = useState({});
+  const [isGoogleUser, setIsGoogleUser] = useState(false);
+  const [googleData, setGoogleData] = useState(null);
   const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     fullName: '',
-    username: '',
     email: '',
-    password: '',
-    confirmPassword: '',
     phoneNumber: '',
-    referrerPin: ''
+    referrerPin: '',
   });
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
-  };
-
-  const validateEmail = (email) => {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return re.test(email);
-  };
-
-  const validatePhoneNumber = (phoneNumber) => {
-    const re = /^\+?[1-9]\d{1,14}$/; // Simplified phone number validation
-    return re.test(phoneNumber);
   };
 
   const validateForm = () => {
@@ -64,41 +54,46 @@ export default function SignUpForm() {
       }
     });
 
-    if (formData.email && !validateEmail(formData.email)) {
-      errors.email = 'Invalid email address';
-    }
-
-    if (formData.phoneNumber && !validatePhoneNumber(formData.phoneNumber)) {
-      errors.phoneNumber = 'Invalid phone number';
-    }
-
-    if (formData.password !== formData.confirmPassword) {
-      errors.confirmPassword = 'Passwords do not match';
-    }
-
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
+  };
+
+  const handleGoogleSignupSuccess = (credentialResponse) => {
+    const { credential } = credentialResponse;
+    axios
+      .post(`${process.env.REACT_APP_API_HOST}/api/google-signup`, { credential })
+      .then((response) => {
+        setGoogleData(response.data);
+        setIsGoogleUser(true);
+      })
+      .catch((error) => {
+        console.error('Google Signup Error:', error);
+        setErrorMessage('Google Signup failed. Please try again.');
+      });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!validateForm()) {
+    if (!isGoogleUser && !validateForm()) {
       return;
     }
 
-    console.log('Form Data:', formData);
+    const dataToSend = isGoogleUser
+      ? { ...googleData, phoneNumber: formData.phoneNumber, referrerPin: formData.referrerPin }
+      : formData;
+
     try {
-      const response = await axios.post(`${process.env.REACT_APP_API_HOST}/api/signup`, formData);
+      const response = await axios.post(`${process.env.REACT_APP_API_HOST}/api/signup`, dataToSend);
       if (response.data.success) {
-        console.log('User registered successfully!');
+        alert('Signup successful! Check your email for credentials.');
         navigate('/pages/login/login3');
       } else {
-        setErrorMessage('Authentication Failed. Please try again.');
+        setErrorMessage('Signup failed. Please try again.');
       }
     } catch (error) {
-      console.error('Error during registration:', error);
-      setErrorMessage('Authentication Failed. Please try again.');
+      console.error('Signup Error:', error);
+      setErrorMessage('Signup failed. Please try again.');
     }
   };
 
@@ -112,7 +107,7 @@ export default function SignUpForm() {
         overflowY: 'auto',
         height: '100vh',
         p: 2,
-        width: '100%'
+        width: '100%',
       }}
     >
       <Typography component="h1" variant="h3" sx={{ width: '100%', color: '#5106a4', fontWeight: 'bold', py: 3 }}>
@@ -125,54 +120,40 @@ export default function SignUpForm() {
           </Typography>
         )}
         <Grid container spacing={2}>
-          <Grid item xs={12} sm={6}>
+          <Grid item xs={12}>
             <CustomTextField
               name="fullName"
               value={formData.fullName}
               onChange={handleInputChange}
               required
               fullWidth
-              id="fullName"
               label="Full Name"
               error={!!formErrors.fullName}
               helperText={formErrors.fullName}
               autoFocus
+              disabled={isGoogleUser}
             />
           </Grid>
-          <Grid item xs={12} sm={6}>
-            <CustomTextField
-              name="username"
-              value={formData.username}
-              onChange={handleInputChange}
-              required
-              fullWidth
-              id="username"
-              label="Username"
-              error={!!formErrors.username}
-              helperText={formErrors.username}
-            />
-          </Grid>
-          <Grid item xs={12} sm={6}>
+          <Grid item xs={12}>
             <CustomTextField
               name="email"
               value={formData.email}
               onChange={handleInputChange}
               required
               fullWidth
-              id="email"
               label="Email"
               error={!!formErrors.email}
               helperText={formErrors.email}
+              disabled={isGoogleUser}
             />
           </Grid>
-          <Grid item xs={12} sm={6}>
+          <Grid item xs={12}>
             <CustomTextField
               name="phoneNumber"
               value={formData.phoneNumber}
               onChange={handleInputChange}
               required
               fullWidth
-              id="phoneNumber"
               label="Phone Number"
               error={!!formErrors.phoneNumber}
               helperText={formErrors.phoneNumber}
@@ -185,52 +166,29 @@ export default function SignUpForm() {
               onChange={handleInputChange}
               required
               fullWidth
-              id="referrerPin"
               label="Referrer PIN"
               error={!!formErrors.referrerPin}
               helperText={formErrors.referrerPin}
             />
           </Grid>
-          <Grid item xs={12} sm={6}>
-            <CustomTextField
-              required
-              fullWidth
-              value={formData.password}
-              onChange={handleInputChange}
-              name="password"
-              label="Password"
-              type="password"
-              id="password"
-              error={!!formErrors.password}
-              helperText={formErrors.password}
-            />
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <CustomTextField
-              required
-              fullWidth
-              value={formData.confirmPassword}
-              onChange={handleInputChange}
-              name="confirmPassword"
-              label="Confirm Password"
-              type="password"
-              id="confirmPassword"
-              error={!!formErrors.confirmPassword}
-              helperText={formErrors.confirmPassword}
-            />
-          </Grid>
           <Grid item xs={12}>
-            <FormControlLabel control={<Checkbox value="allowExtraEmails" color="primary" />} label="I Accept terms and conditions." />
+            <FormControlLabel control={<Checkbox value="terms" color="primary" />} label="I Accept terms and conditions." />
           </Grid>
         </Grid>
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3, mb: 2 }}>
           <Button
             type="submit"
             variant="contained"
-            sx={{ width: 'fit-content', px: 10, py: 1, borderRadius: '14px' }} // Adjust the width and padding
+            sx={{ width: 'fit-content', px: 10, py: 1, borderRadius: '14px' }}
           >
             Sign Up
           </Button>
+        </Box>
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3, mb: 2 }}>
+          <GoogleLogin
+            onSuccess={handleGoogleSignupSuccess}
+            onError={() => setErrorMessage('Google signup failed. Please try again.')}
+          />
         </Box>
         <Grid container justifyContent="flex-end">
           <Grid item>

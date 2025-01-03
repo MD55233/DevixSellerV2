@@ -27,6 +27,13 @@ const wallet = {
       type: 'item',
       url: '/wallet/add',
       icon: icons.IconTablePlus
+    },
+    {
+      id: 'Chat',
+      title: 'Contact Us',
+      type: 'item',
+      url: '/utilities/Chat',
+      icon: icons.IconTablePlus
     }
   ]
 };

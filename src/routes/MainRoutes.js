@@ -27,7 +27,7 @@ const UserInfoPage = Loadable(lazy(() => import('views/utilities/UserInfoPage'))
 const Wallet = Loadable(lazy(() => import('views/wallet/Wallet')));
 const AddWallet = Loadable(lazy(() => import('views/wallet/AddWallet')));
 const PasswordChange = Loadable(lazy(() => import('../layout/MainLayout/Header/ProfileSection/PasswordChange')));
-
+const ChatApp = Loadable(lazy(() => import('views/utilities/ChatApp')));
 // ==============================|| MAIN ROUTING ||============================== //
 
 const MainRoutes = {
@@ -63,6 +63,15 @@ const MainRoutes = {
         {
           path: 'more',
           element: <More />
+        }
+      ]
+    },
+    {
+      path: 'utilities',
+      children: [
+        {
+          path: 'Chat',
+          element: <ChatApp />
         }
       ]
     },

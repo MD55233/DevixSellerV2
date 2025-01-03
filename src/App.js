@@ -10,6 +10,7 @@ import themes from 'themes';
 
 // project imports
 import NavigationScroll from 'layout/NavigationScroll';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 
 // ==============================|| APP ||============================== //
 
@@ -17,14 +18,16 @@ const App = () => {
   const customization = useSelector((state) => state.customization);
 
   return (
-    <StyledEngineProvider injectFirst>
-      <ThemeProvider theme={themes(customization)}>
-        <CssBaseline />
-        <NavigationScroll>
-          <Routes />
-        </NavigationScroll>
-      </ThemeProvider>
-    </StyledEngineProvider>
+    <GoogleOAuthProvider clientId={process.env.REACT_APP_CLIENT_ID}>
+      <StyledEngineProvider injectFirst>
+        <ThemeProvider theme={themes(customization)}>
+          <CssBaseline />
+          <NavigationScroll>
+            <Routes />
+          </NavigationScroll>
+        </ThemeProvider>
+      </StyledEngineProvider>
+    </GoogleOAuthProvider>
   );
 };
 

@@ -5,9 +5,30 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const cors = require('cors');
 require('dotenv').config();
+const nodemailer = require('nodemailer');
+const jwt = require('jsonwebtoken');
 
 const app = express();
 const PORT = 8001;
+
+// SMTP Configuration for Hostinger Webmail
+const transporter = nodemailer.createTransport({
+  host: "smtp.hostinger.com",
+  port: 465,
+  secure: true,
+  auth: {
+      user: 'process.env.SMTP_EMAIL',
+      pass: 'process.env.SMTP_PASSWORD',
+  },
+
+});
+
+// Generate Random Username and Password
+const generateCredentials = () => {
+  const username = `user${Math.floor(1000 + Math.random() * 9000)}`;
+  const password = Math.random().toString(36).slice(-8);
+  return { username, password };
+};
 
 // ------------||Serve static files from the 'uploads' directory||----------------------
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
@@ -48,10 +69,10 @@ const userSchema = new mongoose.Schema(
     password: { type: String, required: true },
     email: { type: String, required: true, unique: true, trim: true },
     phoneNumber: { type: String, required: true },
-    accountType: { type: String, required: true }, // e.g., "Starter", "Pro", "Premium"
+    accountType: { type: String, required: true,  default: 'Starter' }, // e.g., "Starter", "Pro", "Premium"
     balance: { type: Number, default: 0 },
     withdrawalBalance: { type: Number, default: 0 },
-    dailyTaskLimit: { type: Number, required: true },
+    dailyTaskLimit: { type: Number, required: true , default: 10 },
     lastCompletedDate: { type: Date, default: null },
     tasksCompletedToday: { type: Number, default: 0 },
     bonusBalance: { type: Number, default: 0 },
@@ -90,6 +111,110 @@ const userSchema = new mongoose.Schema(
 );
 
 const User = mongoose.model('User', userSchema);  // Define User model
+
+// Admin Schema
+const adminSchema = new mongoose.Schema({
+  fullName: { type: String, required: true, trim: true },
+  username: { type: String, required: true, unique: true, trim: true },
+  password: { type: String, required: true },
+  totalProfit: { type: Number, default: 0 },
+  monthlyProfit: { type: Number, default: 0 },
+  transactions: [{
+    amount: { type: Number, required: true },
+    type: { type: String, required: true }, // e.g., "Withdrawal", "Deposit"
+    date: { type: Date, default: Date.now }
+  }]
+}, { timestamps: true });
+
+const Admin = mongoose.model('Admin', adminSchema);
+// Signup Endpoint
+app.post('/api/signup', async (req, res) => {
+  const { fullName, email, phoneNumber, referrerPin } = req.body;
+
+  try {
+    // Check if email already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ success: false, message: 'Email already exists. Please use a different email.' });
+    }
+
+    // Check if the referrerPin matches an existing username
+    let referrer = null;
+    if (referrerPin) {
+      referrer = await User.findOne({ username: referrerPin });
+      if (!referrer) {
+        return res.status(400).json({ success: false, message: 'Invalid referral code (referrerPin). Please check and try again.' });
+      }
+    }
+
+    const { username, password } = generateCredentials();
+
+    const newUser = new User({
+      fullName,
+      username,
+      email,
+      phoneNumber,
+      password,
+      referralDetails: {
+        referralCode: referrer ? referrer.username : null, // Set referralCode to referrer’s username
+        referrer: referrer ? referrer._id : null, // Store referrer’s ObjectId for reference
+      },
+    });
+
+    await newUser.save();
+
+    // Send Email
+    await transporter.sendMail({
+      from: process.env.SMTP_EMAIL,
+      to: email,
+      subject: 'Welcome to Our Platform',
+      text: `Hello ${fullName},\n\nYour account has been created.\nUsername: ${username}\nPassword: ${password}\nReferral Code: ${referrer ? referrer.username : 'None'}\n\nThank you!`,
+    });
+
+    res.json({ success: true });
+  } catch (err) {
+    if (err.code === 11000) {
+      // Duplicate key error (e.g., email or username already exists)
+      return res.status(400).json({ success: false, message: 'Email or username already exists. Please use a different one.' });
+    }
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Server Error' });
+  }
+});
+
+// Google Signup Endpoint
+app.post('/api/google-signup', async (req, res) => {
+  const { credential, phoneNumber } = req.body;
+
+  try {
+    const { email, name } = jwt.decode(credential); // Decode JWT from Google
+
+    const { username, password } = generateCredentials();
+
+    const newUser = new User({
+      fullName: name,
+      username,
+      email,
+      phoneNumber,
+      password,
+    });
+
+    await newUser.save();
+
+    // Send Email
+    await transporter.sendMail({
+      from: process.env.SMTP_EMAIL,
+      to: email,
+      subject: 'Welcome to Our Platform',
+      text: `Hello ${name},\n\nYour account has been created.\nUsername: ${username}\nPassword: ${password}\n\nThank you!`,
+    });
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Google Signup Error' });
+  }
+});
 
 // Route to fetch all data of a user based on username
 app.get('/api/user/:username', async (req, res) => {
@@ -1161,5 +1286,31 @@ app.put('/api/user/:username', profileUpload.single('profilePicture'), async (re
     }
     console.error('Error updating user:', error);
     res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+
+
+//------------------------|whatsappChat page backend||--------------------------
+
+// Define Mongoose Schema for WhatsApp Contacts
+const whatsappContactSchema = new mongoose.Schema({
+  whatsappNumber: { type: String, required: true, unique: true },
+  fullName: { type: String, required: true },
+  email: { type: String, required: true },
+  phoneNumber: { type: String, required: true },
+}, { timestamps: true });
+
+const WhatsappContact = mongoose.model('WhatsappContact', whatsappContactSchema);
+
+
+// Get all WhatsApp contacts
+app.get('/api/admin/whatsapp/contacts', async (req, res) => {
+  try {
+    const contacts = await WhatsappContact.find();
+    res.json({ contacts });
+  } catch (err) {
+    console.error('Error fetching WhatsApp contacts:', err);
+    res.status(500).json({ message: 'Server error' });
   }
 });
