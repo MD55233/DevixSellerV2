@@ -1,45 +1,43 @@
-import React, { useState } from 'react';
-import axios from 'axios';
-import Button from '@mui/material/Button';
-import TextField from '@mui/material/TextField';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Checkbox from '@mui/material/Checkbox';
-import Link from '@mui/material/Link';
-import Grid from '@mui/material/Grid';
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
-import { styled } from '@mui/material/styles';
-import { useNavigate } from 'react-router';
-import { GoogleLogin } from '@react-oauth/google';
+import React, { useState } from "react";
+import axios from "axios";
+import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Checkbox from "@mui/material/Checkbox";
+import Link from "@mui/material/Link";
+import Grid from "@mui/material/Grid";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import { styled } from "@mui/material/styles";
+import { useNavigate } from "react-router";
+import { GoogleLogin } from "@react-oauth/google";
 
 const CustomTextField = styled(TextField)({
-  '& .MuiOutlinedInput-root': {
-    '& fieldset': {
-      borderRadius: '20px',
-      borderColor: '#8e44ad', // Purple berry color
+  "& .MuiOutlinedInput-root": {
+    "& fieldset": {
+      borderRadius: "20px",
+      borderColor: "#8e44ad",
     },
-    '&:hover fieldset': {
-      borderColor: '#8e44ad',
+    "&:hover fieldset": {
+      borderColor: "#8e44ad",
     },
-    '&.Mui-focused fieldset': {
-      borderColor: '#8e44ad',
+    "&.Mui-focused fieldset": {
+      borderColor: "#8e44ad",
     },
   },
 });
 
 export default function SignUpForm() {
-  const [errorMessage, setErrorMessage] = useState('');
-  const [formErrors, setFormErrors] = useState({});
-  const [isGoogleUser, setIsGoogleUser] = useState(false);
-  const [googleData, setGoogleData] = useState(null);
-  const navigate = useNavigate();
-
   const [formData, setFormData] = useState({
-    fullName: '',
-    email: '',
-    phoneNumber: '',
-    referrerPin: '',
+    fullName: "",
+    email: "",
+    phoneNumber: "",
+    referrerPin: "",
   });
+  const [errorMessage, setErrorMessage] = useState("");
+  const [formErrors, setFormErrors] = useState({});
+  const [isGoogleUser] = useState(false);
+  const navigate = useNavigate();
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -50,26 +48,30 @@ export default function SignUpForm() {
     const errors = {};
     Object.keys(formData).forEach((key) => {
       if (!formData[key]) {
-        errors[key] = 'This field is required';
+        errors[key] = "This field is required";
       }
     });
-
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
 
-  const handleGoogleSignupSuccess = (credentialResponse) => {
+  const handleGoogleSignupSuccess = async (credentialResponse) => {
     const { credential } = credentialResponse;
-    axios
-      .post(`${process.env.REACT_APP_API_HOST}/api/google-signup`, { credential })
-      .then((response) => {
-        setGoogleData(response.data);
-        setIsGoogleUser(true);
-      })
-      .catch((error) => {
-        console.error('Google Signup Error:', error);
-        setErrorMessage('Google Signup failed. Please try again.');
-      });
+    try {
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_HOST}/api/google-signup`,
+        { credential, phoneNumber: formData.phoneNumber, referrerPin: formData.referrerPin }
+      );
+      if (response.data.success) {
+        alert("Google signup successful! Check your email for credentials.");
+        navigate("/pages/login/login3");
+      } else {
+        setErrorMessage(response.data.message || "Google signup failed. Please try again.");
+      }
+    } catch (error) {
+      console.error("Google Signup Error:", error);
+      setErrorMessage("Google signup failed. Please try again.");
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -79,41 +81,37 @@ export default function SignUpForm() {
       return;
     }
 
-    const dataToSend = isGoogleUser
-      ? { ...googleData, phoneNumber: formData.phoneNumber, referrerPin: formData.referrerPin }
-      : formData;
-
     try {
-      const response = await axios.post(`${process.env.REACT_APP_API_HOST}/api/signup`, dataToSend);
+      const response = await axios.post(`${process.env.REACT_APP_API_HOST}/api/signup`, formData);
       if (response.data.success) {
-        alert('Signup successful! Check your email for credentials.');
-        navigate('/pages/login/login3');
+        alert("Signup successful! Check your email for credentials.");
+        navigate("/pages/login/login3");
       } else {
-        setErrorMessage('Signup failed. Please try again.');
+        setErrorMessage(response.data.message || "Signup failed. Please try again.");
       }
     } catch (error) {
-      console.error('Signup Error:', error);
-      setErrorMessage('Signup failed. Please try again.');
+      console.error("Signup Error:", error);
+      setErrorMessage(error.response?.data?.message || "Signup failed. Please try again.");
     }
   };
 
   return (
     <Box
       sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
         flexGrow: 1,
-        overflowY: 'auto',
-        height: '100vh',
+        overflowY: "auto",
+        height: "100vh",
         p: 2,
-        width: '100%',
+        width: "100%",
       }}
     >
-      <Typography component="h1" variant="h3" sx={{ width: '100%', color: '#5106a4', fontWeight: 'bold', py: 3 }}>
+      <Typography component="h1" variant="h3" sx={{ color: "#5106a4", fontWeight: "bold", py: 3 }}>
         Sign up
       </Typography>
-      <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3, width: '100%' }}>
+      <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3, width: "100%" }}>
         {errorMessage && (
           <Typography color="error" align="center" gutterBottom>
             {errorMessage}
@@ -172,22 +170,18 @@ export default function SignUpForm() {
             />
           </Grid>
           <Grid item xs={12}>
-            <FormControlLabel control={<Checkbox value="terms" color="primary" />} label="I Accept terms and conditions." />
+            <FormControlLabel control={<Checkbox color="primary" />} label="I Accept terms and conditions." />
           </Grid>
         </Grid>
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3, mb: 2 }}>
-          <Button
-            type="submit"
-            variant="contained"
-            sx={{ width: 'fit-content', px: 10, py: 1, borderRadius: '14px' }}
-          >
+        <Box sx={{ display: "flex", justifyContent: "center", mt: 3, mb: 2 }}>
+          <Button type="submit" variant="contained" sx={{ px: 10, py: 1, borderRadius: "14px" }}>
             Sign Up
           </Button>
         </Box>
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3, mb: 2 }}>
+        <Box sx={{ display: "flex", justifyContent: "center", mt: 3, mb: 2 }}>
           <GoogleLogin
             onSuccess={handleGoogleSignupSuccess}
-            onError={() => setErrorMessage('Google signup failed. Please try again.')}
+            onError={() => setErrorMessage("Google signup failed. Please try again.")}
           />
         </Box>
         <Grid container justifyContent="flex-end">
