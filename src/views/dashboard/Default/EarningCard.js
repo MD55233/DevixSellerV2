@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useAuth } from 'views/pages/authentication/AuthContext';
 import { useState, useEffect } from 'react';
 // material-ui
-import { Grid, Typography, Card, Avatar } from '@mui/material';
+import { Grid, Typography, Card, Avatar, Box } from '@mui/material';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
 const EarningCard = ({ isLoading }) => {
@@ -38,44 +38,51 @@ const EarningCard = ({ isLoading }) => {
           sx={{
             display: 'flex',
             flexDirection: 'column',
-            justifyContent: 'center',
             alignItems: 'center',
             borderRadius: '16px',
-            background: 'linear-gradient(270deg,rgb(191, 255, 240) -20%, #FFFFFF 30%)',
-            boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)',
-            padding: '24px',
+            background: 'linear-gradient(270deg, #870000, #190A05)', // Red gradient background
+            boxShadow: '0px 8px 20px rgba(0, 0, 0, 0.2)',
+            padding: '20px',
+            color: '#FFFFFF',
           }}
         >
-          {/* Avatar Section */}
+          {/* Profile Picture Section */}
           <Avatar
-            sx={{ width: 64, height: 64, marginBottom: '12px' }}
+            sx={{ width: 64, height: 64, marginBottom: '8px', border: '2px solid #FFFFFF' }}
             src={profilePicture ? `${process.env.REACT_APP_API_HOST}/${profilePicture}` : null} // Show profile picture if available
           >
             {!profilePicture && <AccountCircleIcon sx={{ fontSize: '2.5rem', color: '#FFFFFF' }} />} {/* Fallback to default icon */}
           </Avatar>
 
+          {/* Full Name Section */}
           <Typography
             sx={{
-              fontSize: '1.125rem',
+              fontSize: '1.2rem',
               fontWeight: 600,
-              color: '#333',
-              marginBottom: '16px',
+              marginBottom: '12px',
             }}
           >
             {fullName || 'Name Surname'}
           </Typography>
 
           {/* Divider Line */}
-          <hr style={{ width: '100%', border: '0.5px solid #E0E0E0', margin: '12px 0' }} />
+          <Box
+            sx={{
+              width: '90%',
+              height: '1px',
+              background: 'rgba(255, 255, 255, 0.3)',
+              marginBottom: '16px',
+            }}
+          />
 
-          {/* Balance and Expenses Section */}
+          {/* Balance and Commission Section */}
           <Grid container justifyContent="space-between" alignItems="center" spacing={2} sx={{ width: '100%' }}>
             <Grid item xs={6} textAlign="center">
               <Typography
                 sx={{
                   fontSize: '0.875rem',
                   fontWeight: 400,
-                  color: '#2CB693',
+                  color: '#FFD700', // Golden Yellow
                   marginBottom: '4px',
                 }}
               >
@@ -85,7 +92,6 @@ const EarningCard = ({ isLoading }) => {
                 sx={{
                   fontSize: '1.5rem',
                   fontWeight: 700,
-                  color: '#2CB693',
                 }}
               >
                 Rs {pendingCommission.toFixed(2)}
@@ -97,7 +103,7 @@ const EarningCard = ({ isLoading }) => {
                 sx={{
                   fontSize: '0.875rem',
                   fontWeight: 400,
-                  color: '#2CB693',
+                  color: '#FFD700', // Golden Yellow
                   marginBottom: '4px',
                 }}
               >
@@ -107,7 +113,6 @@ const EarningCard = ({ isLoading }) => {
                 sx={{
                   fontSize: '1.5rem',
                   fontWeight: 700,
-                  color: '#2CB693',
                 }}
               >
                 Rs {balance.toFixed(2)}

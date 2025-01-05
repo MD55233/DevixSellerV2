@@ -92,7 +92,7 @@ const MainLayout = () => {
         <Outlet />
       </Main>
        {/* footer */}
-       {matchDownMd && <Footer sx={{ position: 'fixed', bottom: 0, width: '100%' }} />}
+       { <Footer sx={{ position: 'fixed', bottom: 0, width: '100%' }} />}
 
       <Customization />
     </Box>
