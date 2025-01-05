@@ -4,7 +4,7 @@ import { Outlet } from 'react-router-dom';
 // material-ui
 import { styled, useTheme } from '@mui/material/styles';
 import { AppBar, Box, CssBaseline, Toolbar, useMediaQuery } from '@mui/material';
-
+import Footer from './Footer';
 // project imports
 import Breadcrumbs from 'ui-component/extended/Breadcrumbs';
 import Header from './Header';
@@ -91,6 +91,9 @@ const MainLayout = () => {
         <Breadcrumbs separator={IconChevronRight} navigation={navigation} icon title rightAlign />
         <Outlet />
       </Main>
+       {/* footer */}
+       {matchDownMd && <Footer sx={{ position: 'fixed', bottom: 0, width: '100%' }} />}
+
       <Customization />
     </Box>
   );
