@@ -1,16 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
-import Link from "@mui/material/Link";
+
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { styled } from "@mui/material/styles";
-import { useNavigate } from "react-router";
-import { GoogleLogin } from "@react-oauth/google";
+
+import { useParams } from 'react-router-dom'; // <-- Added import
 
 const CustomTextField = styled(TextField)({
   "& .MuiOutlinedInput-root": {
@@ -28,16 +28,25 @@ const CustomTextField = styled(TextField)({
 });
 
 export default function SignUpForm() {
+  const { username } = useParams(); // Extract username (referral pin) from URL
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
     phoneNumber: "",
-    referrerPin: "",
+    referrerPin: username || "", // Initialize referrerPin with username from the route
   });
   const [errorMessage, setErrorMessage] = useState("");
   const [formErrors, setFormErrors] = useState({});
   const [isGoogleUser] = useState(false);
-  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!username) {
+      // Redirect or show an error if username is missing
+      setErrorMessage("Referrer username is required.");
+    } else {
+      setFormData((prevData) => ({ ...prevData, referrerPin: username }));
+    }
+  }, [username]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -55,29 +64,10 @@ export default function SignUpForm() {
     return Object.keys(errors).length === 0;
   };
 
-  const handleGoogleSignupSuccess = async (credentialResponse) => {
-    const { credential } = credentialResponse;
-    try {
-      const response = await axios.post(
-        `${process.env.REACT_APP_API_HOST}/api/google-signup`,
-        { credential, phoneNumber: formData.phoneNumber, referrerPin: formData.referrerPin }
-      );
-      if (response.data.success) {
-        alert("Google signup successful! Check your email for credentials.");
-        navigate("/pages/login/login3");
-      } else {
-        setErrorMessage(response.data.message || "Google signup failed. Please try again.");
-      }
-    } catch (error) {
-      console.error("Google Signup Error:", error);
-      setErrorMessage("Google signup failed. Please try again.");
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!isGoogleUser && !validateForm()) {
+    if (!validateForm()) {
       return;
     }
 
@@ -85,7 +75,7 @@ export default function SignUpForm() {
       const response = await axios.post(`${process.env.REACT_APP_API_HOST}/api/signup`, formData);
       if (response.data.success) {
         alert("Signup successful! Check your email for credentials.");
-        navigate("/pages/login/login3");
+        window.location.href = "/pages/login/login3";
       } else {
         setErrorMessage(response.data.message || "Signup failed. Please try again.");
       }
@@ -94,6 +84,14 @@ export default function SignUpForm() {
       setErrorMessage(error.response?.data?.message || "Signup failed. Please try again.");
     }
   };
+
+  if (!username) {
+    return (
+      <Typography color="error" align="center" variant="h4">
+        Referrer username is required.
+      </Typography>
+    );
+  }
 
   return (
     <Box
@@ -161,12 +159,12 @@ export default function SignUpForm() {
             <CustomTextField
               name="referrerPin"
               value={formData.referrerPin}
-              onChange={handleInputChange}
               required
               fullWidth
               label="Referrer PIN"
               error={!!formErrors.referrerPin}
               helperText={formErrors.referrerPin}
+              disabled
             />
           </Grid>
           <Grid item xs={12}>
@@ -179,18 +177,11 @@ export default function SignUpForm() {
           </Button>
         </Box>
         <Box sx={{ display: "flex", justifyContent: "center", mt: 3, mb: 2 }}>
-          <GoogleLogin
-            onSuccess={handleGoogleSignupSuccess}
-            onError={() => setErrorMessage("Google signup failed. Please try again.")}
-          />
+          
         </Box>
-        <Grid container justifyContent="flex-end">
-          <Grid item>
-            <Link href="#" variant="body2">
-              Already have an account? Sign in
-            </Link>
-          </Grid>
-        </Grid>
+      
+         
+      
       </Box>
     </Box>
   );

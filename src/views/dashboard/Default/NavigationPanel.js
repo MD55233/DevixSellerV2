@@ -5,9 +5,9 @@ import { useNavigate } from 'react-router-dom'; // Import useNavigate hook
 import TaskIcon from './icons/clipboard-checklist.png';
 import WithdrawalsIcon from './icons/money-transfer.png';
 import SettingsIcon from './icons/settings.png';
-import ReferralIcon from './icons/add-referral.png';
+import ReferralIcon from './icons/stack-of-books.png';
 import NewsIcon from './icons/newspaper.png';
-import MoreIcon from './icons/menu.png';
+import MoreIcon from './icons/add-referral.png';
 
 const NavigationCard = ({ title, icon, onClick }) => (
   <Card

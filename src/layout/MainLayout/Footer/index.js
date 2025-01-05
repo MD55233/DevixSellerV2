@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, BottomNavigation, BottomNavigationAction } from '@mui/material';
-import { Home, Assignment , PersonAdd , MoreHoriz  } from '@mui/icons-material';
+import { Home, Assignment, PersonAdd, MoreHoriz } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate hook
 
 const Footer = () => {
@@ -45,10 +45,54 @@ const Footer = () => {
         showLabels
         sx={{ backgroundColor: '#f8f9fa' }}
       >
-        <BottomNavigationAction label="Home" icon={<Home />} />
-        <BottomNavigationAction label="Tasks" icon={<Assignment  />} />
-        <BottomNavigationAction label="Add Referral" icon={<PersonAdd  />} />
-        <BottomNavigationAction label="More" icon={<MoreHoriz  />} />
+        <BottomNavigationAction
+          label="Home"
+          icon={<Home />}
+          sx={{
+            '&.Mui-selected': {
+              color: '#2C6831', // Icon color when active
+              backgroundColor: '#dbffe6', // Light green background when active
+              borderRadius: '100px', // Small curve for the active button
+              height: '100%', // Full height of the BottomNavigation
+            },
+          }}
+        />
+        <BottomNavigationAction
+          label="Tasks"
+          icon={<Assignment />}
+          sx={{
+            '&.Mui-selected': {
+              color: '#2C6831', // Icon color when active
+              backgroundColor: '#dbffe6', // Light green background when active
+              borderRadius: '100px', // Small curve for the active button
+              height: '100%', // Full height of the BottomNavigation
+            },
+          }}
+        />
+        <BottomNavigationAction
+          label="Add Referral"
+          icon={<PersonAdd />}
+          sx={{
+            '&.Mui-selected': {
+              color: '#2C6831', // Icon color when active
+              backgroundColor: '#dbffe6', // Light green background when active
+              borderRadius: '100px', // Small curve for the active button
+              height: '100%', // Full height of the BottomNavigation
+            },
+          }}
+        />
+        <BottomNavigationAction
+          label="More"
+          icon={<MoreHoriz />}
+          sx={{
+            '&.Mui-selected': {
+              color: '#2C6831', // Icon color when active
+              backgroundColor: '#dbffe6', // Light green background when active
+              borderRadius: '100px', // Small curve for the active button
+              height: '100%', // Full height of the BottomNavigation
+            },
+          }}
+        />
       </BottomNavigation>
     </Box>
   );
