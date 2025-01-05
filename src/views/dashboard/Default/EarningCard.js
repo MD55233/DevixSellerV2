@@ -40,7 +40,7 @@ const EarningCard = ({ isLoading }) => {
             flexDirection: 'column',
             alignItems: 'center',
             borderRadius: '16px',
-            background: 'linear-gradient(270deg, #870000, #190A05)', // Red gradient background
+            background: 'linear-gradient(270deg, #2C6831, #190A05)', // Red gradient background
             boxShadow: '0px 8px 20px rgba(0, 0, 0, 0.2)',
             padding: '20px',
             color: '#FFFFFF',
@@ -86,7 +86,7 @@ const EarningCard = ({ isLoading }) => {
                   marginBottom: '4px',
                 }}
               >
-                Pending Commission
+                Commission
               </Typography>
               <Typography
                 sx={{
@@ -94,7 +94,7 @@ const EarningCard = ({ isLoading }) => {
                   fontWeight: 700,
                 }}
               >
-                Rs {pendingCommission.toFixed(2)}
+                Rs {pendingCommission.toFixed(0)}
               </Typography>
             </Grid>
 
@@ -115,7 +115,7 @@ const EarningCard = ({ isLoading }) => {
                   fontWeight: 700,
                 }}
               >
-                Rs {balance.toFixed(2)}
+                Rs {balance.toFixed(0)}
               </Typography>
             </Grid>
           </Grid>

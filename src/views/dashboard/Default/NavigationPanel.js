@@ -1,74 +1,115 @@
 import { Card, Grid, Typography, Avatar } from '@mui/material';
-import TaskIcon from '@mui/icons-material/Task';
-import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
-import SettingsIcon from '@mui/icons-material/Settings';
-import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
-import ArticleIcon from '@mui/icons-material/Article';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate hook
 
-const NavigationCard = ({ title, icon: Icon, onClick }) => (
+// Import the PNG icons
+import TaskIcon from './icons/clipboard-checklist.png';
+import WithdrawalsIcon from './icons/money-transfer.png';
+import SettingsIcon from './icons/settings.png';
+import ReferralIcon from './icons/add-referral.png';
+import NewsIcon from './icons/newspaper.png';
+import MoreIcon from './icons/menu.png';
+
+const NavigationCard = ({ title, icon, onClick }) => (
   <Card
     sx={{
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      background: 'linear-gradient(135deg, #F0F8FF 0%, #FFFFFF 100%)',
-      borderRadius: '24px',
-      boxShadow: '0px 6px 15px rgba(0, 0, 0, 0.15)',
-      padding: '20px',
+      backgroundColor: '#FFFFFF', // White background for card
+      borderRadius: '12px', // Match rounded square style
+      boxShadow: '0px 2px 5px rgba(0, 0, 0, 0.1)',
+      padding: '12px',
       cursor: 'pointer',
-      transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+      transition: 'transform 0.2s ease-in-out',
       '&:hover': {
-        transform: 'scale(1.1)',
-        boxShadow: '0px 8px 20px rgba(0, 0, 0, 0.25)',
+        transform: 'scale(1.05)',
       },
     }}
     onClick={onClick}
   >
     <Avatar
       sx={{
-        background: 'linear-gradient(135deg, #FF6B6B, #FFD93D)',
-        width: 64,
-        height: 64,
-        marginBottom: '16px',
+        backgroundColor: '#F5F5F5', // Light gray background for the icon
+        width: 48, // Larger size for the avatar
+        height: 48,
+        marginBottom: '8px',
+        borderRadius: '12px', // Rounded square style
       }}
     >
-      <Icon sx={{ color: '#FFFFFF', fontSize: '2.5rem' }} />
+      <img src={icon} alt={`${title} Icon`} style={{ width: '40px', height: '40px' }} />
     </Avatar>
-    <Typography sx={{ fontSize: '1.2rem', fontWeight: 600, color: '#333', textAlign: 'center' }}>
+    <Typography
+      sx={{
+        fontSize: '0.75rem', // Smaller font size
+        fontWeight: 500,
+        color: '#333333',
+        textAlign: 'center', // Center-align the text
+      }}
+    >
       {title}
     </Typography>
   </Card>
 );
 
 const NavigationPanel = () => {
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // Initialize useNavigate hook
 
   const handleNavigation = (page) => {
     console.log(`Navigating to ${page}`);
-    navigate(`/${page}`);
+    navigate(`/${page}`); // Use navigate to programmatically navigate to the page
   };
 
   return (
-    <Grid container spacing={3} sx={{ padding: '24px' }}>
-      <Grid item xs={6} sm={4} md={3}>
-        <NavigationCard title="Tasks" icon={TaskIcon} onClick={() => handleNavigation('payments/task-center')} />
+    <Grid
+      container
+      spacing={2} // Adjust spacing between grid items
+      sx={{
+        marginTop: '16px',
+        justifyContent: 'center', // Center the grid items
+      }}
+    >
+      <Grid item xs={4}>
+        <NavigationCard
+          title="Tasks"
+          icon={TaskIcon}
+          onClick={() => handleNavigation('payments/task-center')}
+        />
       </Grid>
-      <Grid item xs={6} sm={4} md={3}>
-        <NavigationCard title="Withdrawals" icon={MonetizationOnIcon} onClick={() => handleNavigation('payments/withdraw')} />
+      <Grid item xs={4}>
+        <NavigationCard
+          title="Withdrawals"
+          icon={WithdrawalsIcon}
+          onClick={() => handleNavigation('payments/withdraw')}
+        />
       </Grid>
-      <Grid item xs={6} sm={4} md={3}>
-        <NavigationCard title="Settings" icon={SettingsIcon} onClick={() => handleNavigation('password-change')} />
+      <Grid item xs={4}>
+        <NavigationCard
+          title="Settings"
+          icon={SettingsIcon}
+          onClick={() => handleNavigation('password-change')}
+        />
       </Grid>
-      <Grid item xs={6} sm={4} md={3}>
-        <NavigationCard title="Add Referral" icon={EmojiEventsIcon} onClick={() => handleNavigation('payments/referral/plans')} />
+      <Grid item xs={4}>
+        <NavigationCard
+          title="Ad Referral"
+          icon={ReferralIcon}
+          onClick={() => handleNavigation('payments/referral/plans')}
+        />
       </Grid>
-      <Grid item xs={6} sm={4} md={3}>
-        <NavigationCard title="News" icon={ArticleIcon} onClick={() => window.open('https://www.laikostar.com/news/', '_blank')} />
+      <Grid item xs={4}>
+        <NavigationCard
+          title="News"
+          icon={NewsIcon}
+          onClick={() => window.open('https://www.laikostar.com/news/', '_blank')}
+        />
       </Grid>
-      <Grid item xs={6} sm={4} md={3}>
-        <NavigationCard title="More" icon={SettingsIcon} onClick={() => handleNavigation('utilities/more')} />
+      <Grid item xs={4}>
+        <NavigationCard
+          title="More"
+          icon={MoreIcon}
+          onClick={() => handleNavigation('utilities/more')}
+        />
       </Grid>
     </Grid>
   );
