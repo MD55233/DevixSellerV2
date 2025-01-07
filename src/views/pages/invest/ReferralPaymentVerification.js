@@ -1,83 +1,90 @@
 import React, { useState, useEffect } from 'react';
-import { Button, TextField, Typography, Grid, Card, CardMedia, Paper, MenuItem, Select, InputLabel, FormControl, Box } from '@mui/material';
+import {
+  Button,
+  TextField,
+  Typography,
+  Grid,
+  Paper,
+  MenuItem,
+  Select,
+  InputLabel,
+  FormControl,
+  Box,
+  Card,
+  CardMedia,
+} from '@mui/material';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from 'views/pages/authentication/AuthContext';
 
 const ReferralPaymentVerification = () => {
   const navigate = useNavigate();
-  const { username } = useAuth(); // Assuming you have an authentication context providing username
-  // Fetch selected plan details from localStorage
-  const selectedPlan = JSON.parse(localStorage.getItem('selectedPlan'));
+  const { username } = useAuth();
+  const selectedPlan = JSON.parse(localStorage.getItem('selectedPlan')); // Plan details from localStorage
 
   const [transactionId, setTransactionId] = useState('');
-  const [transactionAmount, setTransactionAmount] = useState(0); // Default value
+  const [transactionAmount, setTransactionAmount] = useState('');
   const [gateway, setGateway] = useState('');
   const [image, setImage] = useState(null);
-  const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
-  // Effect to set transactionAmount initially from selectedPlan
   useEffect(() => {
-    if (selectedPlan && selectedPlan.price) {
-      setTransactionAmount(selectedPlan.price);
+    if (selectedPlan) {
+      setTransactionAmount(selectedPlan.price || '');
     }
   }, [selectedPlan]);
 
-  // Handle form submission
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    const formData = new FormData();
-    formData.append('username', username);
-    formData.append('transactionId', transactionId);
-    formData.append('transactionAmount', selectedPlan.price); // Use selected plan's price
-    formData.append('gateway', gateway);
-    formData.append('image', image);
-
-    // Append selected plan details to formData
-    formData.append('planName', selectedPlan.name);
-    formData.append('planPRICE', selectedPlan.price);
-    formData.append('advancePoints', selectedPlan.advancePoints);
-    formData.append('DirectPoint', selectedPlan.DirectPoint);
-    formData.append('IndirectPoint', selectedPlan.IndirectPoint);
-    formData.append('parent', parseFloat(selectedPlan.parent));
-    formData.append('grandParent', parseFloat(selectedPlan.grandParent));
-
-    try {
-      const response = await axios.post(`${process.env.REACT_APP_API_HOST}/api/referral-payment/upload`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
-      console.log('Form submitted:', response.data);
-      setSuccessMessage('Referral Payment details uploaded successfully.');
-      setErrorMessage('');
-
-      // Reset form state after submission
-      setTransactionId('');
-      setTransactionAmount(0); // Reset to default
-      setGateway('');
-      setImage(null);
-
-      // Remove selectedPlan from localStorage
-      localStorage.removeItem('selectedPlan');
-
-      // Navigate to success page or previous page
-      setTimeout(() => {
-        navigate('/payments/referral/plans'); // Navigate to success page after submission
-      }, 2000); // Adjust timing as needed
-    } catch (error) {
-      console.error('Error submitting form:', error);
-      setErrorMessage('Error submitting form. Please try again.');
-      setSuccessMessage('');
-    }
-  };
-
-  // Handle file selection
   const handleFileChange = (event) => {
     const file = event.target.files[0];
     if (file && file.type.startsWith('image/')) {
       setImage(file);
     } else {
-      alert('Please select an image file.');
+      alert('Please upload a valid image file.');
+    }
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    if (!transactionId || !transactionAmount || !gateway || !image || !username || !selectedPlan) {
+      setErrorMessage('All fields are required, including the image.');
+      setSuccessMessage('');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('username', username);
+    formData.append('transactionId', transactionId);
+    formData.append('transactionAmount', transactionAmount);
+    formData.append('gateway', gateway);
+    formData.append('image', image);
+    formData.append('planName', selectedPlan.name);
+    formData.append('planPrice', selectedPlan.price);
+    formData.append('directBonus', selectedPlan.DirectBonus);
+    formData.append('indirectBonus', selectedPlan.IndirectBonus);
+    formData.append('DailyTaskLimit', selectedPlan.DailyTaskLimit);
+
+    try {
+      const response = await axios.post(`${process.env.REACT_APP_API_HOST}/api/referral-payment/upload`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      console.log('Success:', response.data);
+
+      setSuccessMessage('Referral payment details uploaded successfully.');
+      setErrorMessage('');
+      setTransactionId('');
+      setGateway('');
+      setImage(null);
+      localStorage.removeItem('selectedPlan');
+
+      setTimeout(() => {
+        navigate('/payments/referral/plans');
+      }, 2000);
+    } catch (error) {
+      const errMsg = error.response?.data?.message || 'Error submitting the form. Please try again.';
+      setErrorMessage(errMsg);
+      setSuccessMessage('');
     }
   };
 
@@ -106,7 +113,7 @@ const ReferralPaymentVerification = () => {
               <Select
                 labelId="transactionAmount-label"
                 id="transactionAmount"
-                value={transactionAmount} // Use selected plan's price
+                value={transactionAmount}
                 onChange={(e) => setTransactionAmount(e.target.value)}
                 label="Transaction Amount"
               >
@@ -124,8 +131,8 @@ const ReferralPaymentVerification = () => {
               >
                 <MenuItem value="JazzCash">JazzCash</MenuItem>
                 <MenuItem value="Easypaisa">Easypaisa</MenuItem>
-                <MenuItem value="NayaPay">Bank Transfer</MenuItem>
-                <MenuItem value="SadaPay">Bank Transfer</MenuItem>
+                <MenuItem value="NayaPay">NayaPay</MenuItem>
+                <MenuItem value="SadaPay">SadaPay</MenuItem>
                 <MenuItem value="Bank Transfer">Bank Transfer</MenuItem>
               </Select>
             </FormControl>

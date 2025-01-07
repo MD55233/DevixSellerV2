@@ -4,7 +4,7 @@ import { Typography, Box, Button, CircularProgress } from '@mui/material';
 import CompanyCard from 'ui-component/cards/CompanyCard';
 
 const InvestCard = ({ plan, onClick, isLoading }) => {
-  const { name, price, parent, grandParent } = plan;
+  const { name, price, DirectBonus, IndirectBonus, DailyTaskLimit } = plan;
 
   return (
     <CompanyCard onClick={onClick}>
@@ -20,11 +20,14 @@ const InvestCard = ({ plan, onClick, isLoading }) => {
           <Typography variant="h3" sx={{ color: '#fff', mb: 1 }}>
             Price: pkr {price}
           </Typography>
-          <Typography variant="h4" sx={{ color: '#fff', mb: 1 }}>
-            Direct: {parent * 100}%
+          <Typography variant="h3" sx={{ color: '#fff', mb: 1 }}>
+            DailyTaskLimit:  {DailyTaskLimit}
           </Typography>
           <Typography variant="h4" sx={{ color: '#fff', mb: 1 }}>
-            Indirect: {grandParent * 100}%
+            Direct: {DirectBonus * 1}%
+          </Typography>
+          <Typography variant="h4" sx={{ color: '#fff', mb: 1 }}>
+            Indirect: {IndirectBonus * 1}%
           </Typography>
           <Button variant="contained" color="primary">
             Choose
@@ -39,8 +42,8 @@ InvestCard.propTypes = {
   plan: PropTypes.shape({
     name: PropTypes.string.isRequired,
     price: PropTypes.number.isRequired,
-    parent: PropTypes.number.isRequired,
-    grandParent: PropTypes.number.isRequired
+    DirectBonus: PropTypes.number.isRequired,
+    IndirectBonus: PropTypes.number.isRequired
   }).isRequired,
   onClick: PropTypes.func.isRequired,
   isLoading: PropTypes.bool.isRequired

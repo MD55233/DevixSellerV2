@@ -94,7 +94,7 @@ const NavigationPanel = () => {
         <NavigationCard
           title="Ad Referral"
           icon={ReferralIcon}
-          onClick={() => handleNavigation('payments/referral/plans')}
+          onClick={() => handleNavigation('payments/referral/referral-link')}
         />
       </Grid>
       <Grid item xs={4}>

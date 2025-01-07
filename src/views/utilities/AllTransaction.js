@@ -25,6 +25,7 @@ const TransactionHistory = () => {
     const fetchTransactions = async () => {
       try {
         const [
+          AllResponse,
           withdrawalsResponse,
           bonusesResponse,
           approvedResponse,
@@ -34,6 +35,7 @@ const TransactionHistory = () => {
           rejectedReferralResponse,
           taskTransactionsResponse, // Fetching task transactions
         ] = await Promise.all([
+          axios.get(`${process.env.REACT_APP_API_HOST}/api/transaction-history/${username}`),
           axios.get(`${process.env.REACT_APP_API_HOST}/api/withdrawals/${username}`),
           axios.get(`${process.env.REACT_APP_API_HOST}/api/training-bonus/${username}`),
           axios.get(`${process.env.REACT_APP_API_HOST}/api/approvals/approve/${username}`), // Approved bonuses
@@ -46,6 +48,7 @@ const TransactionHistory = () => {
 
         // Combine all transaction types into a single array
         const combinedTransactions = [
+          ...AllResponse.data.map(item => ({ ...item, type: 'Creadit' })),
           ...withdrawalsResponse.data.map(item => ({ ...item, type: 'Withdrawal' })),
           ...bonusesResponse.data.map(item => ({ ...item, type: 'Pending Training Bonus', status: 'pending' })),
           ...approvedResponse.data.map(item => ({ ...item, type: 'Approved Training Bonus', status: 'approved' })),

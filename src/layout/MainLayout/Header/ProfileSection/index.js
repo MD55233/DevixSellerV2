@@ -41,18 +41,29 @@ const ProfileSection = () => {
   useEffect(() => {
     const fetchUserdata = async () => {
       try {
-        const response = await axios.get(`${process.env.REACT_APP_API_HOST}/api/user/${username}`);
-        setUserData(response.data.user);
-        setProfilePicture(response.data.user.profilePicture); 
+        const userResponse = await axios.get(`${process.env.REACT_APP_API_HOST}/api/user/${username}`);
+        const referralResponse = await axios.get(`${process.env.REACT_APP_API_HOST}/api/referrals`, {
+          params: { username }
+        });
+  
+        setUserData(userResponse.data.user);
+        setProfilePicture(userResponse.data.user.profilePicture);
+        
+        setUserData((prevData) => ({
+          ...prevData,
+          directReferrals: referralResponse.data.DirectCount,
+          indirectReferrals: referralResponse.data.IndirectCount
+        }));
       } catch (error) {
-        console.error('Error fetching user balance:', error);
+        console.error('Error fetching user data or referrals:', error);
       }
     };
-
+  
     if (username) {
       fetchUserdata();
     }
   }, [username]);
+  
 
   const handleLogout = async () => {
     try {
@@ -152,13 +163,13 @@ const ProfileSection = () => {
                   <Box sx={{ p: 2 }}>
                     <Stack>
                       <Stack direction="row" spacing={0.5} alignItems="center">
-                        <Typography variant="h4">Good Morning,</Typography>
+                        <Typography variant="h4">Hi,</Typography>
                         <Typography component="span" variant="h4" sx={{ fontWeight: 400 }}>
                           {userData ? userData.fullName : 'Loading...'}
                         </Typography>
                       </Stack>
                       <Typography variant="subtitle2" sx={{ color: 'secondary.main' }}>
-                        {userData ? userData.rank : 'Loading...'}
+                       Username: {userData ? userData.username : 'Loading...'}
                       </Typography>
                     </Stack>
                     <Divider />
@@ -167,29 +178,34 @@ const ProfileSection = () => {
                     <Box sx={{ p: 2 }}>
                       <Grid container spacing={3} direction="column">
                         <Grid item>
-                          <Typography variant="subtitle1" sx={{ color: 'primary.dark' }}>
-                            Plan: {userData ? userData.plan : 'Loading...'}
+                          <Typography variant="subtitle1" sx={{ color: 'secondary.main' }}>
+                            Email: {userData ? userData.email : 'Loading...'}
                           </Typography>
                         </Grid>
                         <Grid item>
-                          <Typography variant="subtitle1" sx={{ color: 'primary.dark' }}>
-                            Direct Referral: {userData ? userData.parentName : 'Loading...'}
-                          </Typography>
-                        </Grid>
+  <Typography variant="subtitle1" sx={{ color: 'secondary.main' }}>
+    Direct Referrals: {userData?.directReferrals ?? 'Loading...'}
+  </Typography>
+</Grid>
+<Grid item>
+  <Typography variant="subtitle1" sx={{ color: 'secondary.main' }}>
+    Indirect Referrals: {userData?.indirectReferrals ?? 'Loading...'}
+  </Typography>
+</Grid>
                         <Grid item>
-                          <Typography variant="subtitle1" sx={{ color: 'primary.dark' }}>
-                            Indirect Referral: {userData ? userData.grandParentName : 'Loading...'}
+                          <Typography variant="subtitle1" sx={{ color: 'secondary.main' }}>
+                          Daily Task Limit: {userData ? userData.dailyTaskLimit : 'Loading...'}
                           </Typography>
                         </Grid>
                         {/* Add Username and Email Here */}
                         <Grid item>
-                          <Typography variant="subtitle1" sx={{ color: 'primary.dark' }}>
-                            Username: {userData ? userData.username : 'Loading...'}
+                          <Typography variant="subtitle1" sx={{ color: 'secondary.main' }}>
+                          Phone #: {userData ? userData.phoneNumber : 'Loading...'}
                           </Typography>
                         </Grid>
                         <Grid item>
-                          <Typography variant="subtitle1" sx={{ color: 'primary.dark' }}>
-                            Email: {userData ? userData.email : 'Loading...'}
+                          <Typography variant="subtitle1" sx={{ color: 'secondary.main' }}>
+                          Withdrawable Balance: {userData ? userData.balance : 'Loading...'}
                           </Typography>
                         </Grid>
                       </Grid>

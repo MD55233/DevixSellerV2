@@ -36,17 +36,21 @@ const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(({
   ),
   [theme.breakpoints.up('md')]: {
     marginLeft: open ? 0 : -(drawerWidth - 20),
+    paddingBottom: '100px', // Add padding to prevent overlap with the footer
     width: `calc(100% - ${drawerWidth}px)`
+    
   },
   [theme.breakpoints.down('md')]: {
     marginLeft: '20px',
     width: `calc(100% - ${drawerWidth}px)`,
+    paddingBottom: '100px', // Add padding to prevent overlap with the footer
     padding: '16px'
-  },
+  },  
   [theme.breakpoints.down('sm')]: {
     marginLeft: '10px',
     width: `calc(100% - ${drawerWidth}px)`,
-    padding: '16px',
+    paddingBottom: '100px', // Add padding to prevent overlap with the footer
+  
     marginRight: '10px'
   }
 }));

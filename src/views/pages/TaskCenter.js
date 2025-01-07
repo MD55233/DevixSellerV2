@@ -60,26 +60,33 @@ const TaskCenter = ({ apiBaseUrl }) => {
   }, [username, apiBaseUrl]);
 
   const handleCompleteTask = async (taskId) => {
-    // Set the username directly
-    const userId = username; // Using username as userId
-
     setLoadingTask(true);
     setOpenDialog(true);
-
+  
     try {
-      await new Promise((resolve) => setTimeout(resolve, 2000)); // Simulate animation wait
-      await axios.post(`${process.env.REACT_APP_API_HOST}/api/tasks/${taskId}/complete`, {
-        username: userId,  // Send the username instead of userId
-      });
-
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_HOST}/api/tasks/${taskId}/complete`,
+        { username }
+      );
+  
+      // Get the redirect link from the response
+      const { redirectLink } = response.data;
+  
       // Remove the completed task from the list
       setTasks((prevTasks) => prevTasks.filter((task) => task._id !== taskId));
- 
+  
       // Update the user data (completedTasks count)
       setUserData((prevData) => ({
         ...prevData,
         completedTasks: prevData.completedTasks + 1,
       }));
+  
+      // Redirect to the task's URL after completion
+      if (redirectLink) {
+        setTimeout(() => {
+          window.location.href = redirectLink; // Redirect after showing success dialog
+        }, 2000); // Wait for the dialog to close
+      }
     } catch (error) {
       console.error('Error completing task:', error);
     } finally {
@@ -87,7 +94,7 @@ const TaskCenter = ({ apiBaseUrl }) => {
       setOpenDialog(false);
     }
   };
-
+  
   return (
     <Box p={2}>
       {/* User Summary Section */}
@@ -161,7 +168,11 @@ const TaskCenter = ({ apiBaseUrl }) => {
               <CircularProgress color="success" />
               <Typography variant="body1" mt={2}>
                 Processing task... Please wait.
+                
               </Typography>
+              <Typography variant="body1" mt={2} color="error">
+        Note: Stay on the redirected website for 15 seconds to get the bonus.
+      </Typography>
             </>
           ) : (
             <>

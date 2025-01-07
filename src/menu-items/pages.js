@@ -1,12 +1,13 @@
 // assets
-import { IconUserPlus, IconMoodPlus, IconDeviceTabletUp, IconChecklist  } from '@tabler/icons-react';
+import { IconUserPlus, IconMoodPlus, IconDeviceTabletUp, IconChecklist,IconCrown   } from '@tabler/icons-react';
 
 // constant
 const icons = {
   IconUserPlus,
   IconMoodPlus,
   IconDeviceTabletUp,
-  IconChecklist 
+  IconChecklist,
+  IconCrown 
 };
 
 // ==============================|| EXTRA PAGES MENU ITEMS ||============================== //
@@ -24,11 +25,18 @@ const pages = {
       icon: icons.IconUserPlus
     },
     {
+      id: 'Upgrade Account',
+      title: 'Upgrade Account',
+      type: 'item',
+      url: '/payments/referral/plans',
+      icon: icons.IconCrown
+    },
+    {
       id: 'Add Referral',
       title: 'Add Referral',
       type: 'item',
-      url: '/payments/referral/plans',
-      icon: icons.IconMoodPlus
+      url: '/payments/referral/referral-link',
+      icon: icons.IconMoodPlus 
     },
     {
       id: 'Withdraw',

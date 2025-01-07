@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { Grid } from '@mui/material';
 // project imports
 import EarningCard from './EarningCard';
+import UpgradeAccountCard from './UpgradeAccountCard';
 import NavigationPanel from './NavigationPanel';
 import { gridSpacing } from 'store/constant';
 
@@ -15,7 +16,9 @@ const Dashboard = () => {
   useEffect(() => {
     setLoading(false);
   }, []);
-
+  const handleUpgradeClick = () => {
+    window.location.href = '/payments/referral/plans'; // Replace with your upgrade page route
+  };
   return (
     <Grid container spacing={gridSpacing}>
       <Grid item xs={12}>
@@ -23,8 +26,8 @@ const Dashboard = () => {
       <NavigationPanel isLoading={isLoading} />
      
       </Grid>
-      <Grid item lg={4} md={6} sm={6} xs={12}>
-           
+      <Grid item  xs={12}>
+      <UpgradeAccountCard isLoading={false} onUpgradeClick={handleUpgradeClick} />;
           </Grid>
     
     </Grid>

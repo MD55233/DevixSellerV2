@@ -1,1 +1,0 @@
-(self.webpackChunklaikostar_seller=self.webpackChunklaikostar_seller||[]).push([[115],{5115:function(){}}]);

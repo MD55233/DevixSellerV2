@@ -179,7 +179,7 @@ export default function LoginForm() {
               </Button>
               <Grid container justifyContent="flex-end">
                 <Grid item>
-                  <Button onClick={handleSignup} variant="body1" sx={{ color: 'rgb(247, 247, 247)' }}>
+                  <Button onClick={handleSignup} variant="body1" sx={{ fontSize:'0.7rem',color: 'rgb(247, 247, 247)' }}>
                     Dont have an account? Sign Up
                   </Button>
                 </Grid>

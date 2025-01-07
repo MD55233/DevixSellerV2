@@ -11,6 +11,7 @@ const DashboardDefault = Loadable(lazy(() => import('views/dashboard/Default')))
 const TraningBonus = Loadable(lazy(() => import('views/pages/training-bonus/TrainingBonus')));
 const UploadTraningBonus = Loadable(lazy(() => import('views/pages/training-bonus/UploadTrainingBonus')));
 const Invest = Loadable(lazy(() => import('views/pages/invest/Invest')));
+const ReferralLink  = Loadable(lazy(() => import('views/pages/RefferalLink')));
 const ReferralPaymentVerification = Loadable(lazy(() => import('views/pages/invest/ReferralPaymentVerification')));
 const WithDraw = Loadable(lazy(() => import('views/pages/WithDraw')));
 const TaskCenter = Loadable(lazy(() => import('views/pages/TaskCenter')));
@@ -172,9 +173,14 @@ const MainRoutes = {
             {
               path: 'upload',
               element: <ReferralPaymentVerification />
+            },
+            {
+              path: 'referral-link',
+              element: <ReferralLink/>
             }
           ]
         },
+       
         {
           path: 'withdraw',
           element: <WithDraw />

@@ -15,11 +15,13 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  Card,
+  CardContent
 } from '@mui/material';
 import { useAuth } from 'views/pages/authentication/AuthContext';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion'; // Ensure framer-motion is installed
+import { motion } from 'framer-motion';
 
 const WithdrawBalance = () => {
   const { username } = useAuth(); // Get the username from auth context
@@ -34,6 +36,7 @@ const WithdrawBalance = () => {
   const [dialogOpen, setDialogOpen] = useState(false); // State for dialog open/close
   const [confirmationData, setConfirmationData] = useState(null); // Store data for confirmation
   const [showSuccess, setShowSuccess] = useState(false); // State to show success message
+  const [withdrawalStatus, setWithdrawalStatus] = useState(true); // Default withdrawal status
 
   // Fetch user wallets on component mount
   useEffect(() => {
@@ -45,7 +48,19 @@ const WithdrawBalance = () => {
         console.error('Error fetching wallets:', error);
       }
     };
+
+    // Fetch withdrawal status
+    const fetchWithdrawalStatus = async () => {
+      try {
+        const response = await axios.get(`${process.env.REACT_APP_API_HOST}/api/settings/withdrawal-status`);
+        setWithdrawalStatus(response.data.withdrawalEnabled); // Set status from API response
+      } catch (error) {
+        console.error('Error fetching withdrawal status:', error);
+      }
+    };
+
     fetchWallets();
+    fetchWithdrawalStatus();
   }, [username]);
 
   const handleWalletChange = (event) => {
@@ -106,6 +121,20 @@ const WithdrawBalance = () => {
 
   return (
     <Grid container spacing={3} justifyContent="center">
+      {/* Display withdrawal status box at the top */}
+      <Grid item xs={12}>
+        <Card sx={{ backgroundColor: withdrawalStatus ? '#13E880' : '#F44336', color: 'white' }}>
+          <CardContent>
+            <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+            Withdrawals are allowed only from Monday to Thursday, between 10:00 AM and 10:00 PM.
+            </Typography>
+            <Typography variant="body1">
+              {withdrawalStatus ? 'Withdrawals are allowed.' : 'Withdrawals are currently disabled.'}
+            </Typography>
+          </CardContent>
+        </Card>
+      </Grid>
+
       <Grid item xs={12}>
         <Typography variant="h3" gutterBottom sx={{ color: 'secondary.main', textAlign: 'center' }}>
           Withdraw Balance

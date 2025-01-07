@@ -24,39 +24,25 @@ const DepositHistory = () => {
   useEffect(() => {
     const fetchTransactions = async () => {
       try {
-        // Ensure username is defined
         if (!username) {
           setError('No user is logged in.');
           setLoading(false);
           return;
         }
 
-        const referralResponse = await axios.get(`${process.env.REACT_APP_API_HOST}/api/referral-payment/${username}`);
-        const approvedReferralResponse = await axios.get(`${process.env.REACT_APP_API_HOST}/api/approvals/referral/approve/${username}`);
-        const rejectedReferralResponse = await axios.get(`${process.env.REACT_APP_API_HOST}/api/approvals/referral/reject/${username}`);
+        // Fetch all transaction data in one API call (create an aggregate endpoint in your API)
+        const response = await axios.get(`${process.env.REACT_APP_API_HOST}/api/user/transactions/${username}`);
 
-        // Combine all transaction types into a single array
-        const combinedTransactions = [
-          ...referralResponse.data.map(item => ({
-            ...item,
-            type: 'Referral Payment Verification',
-            status: item.status,
-            remarks: 'Referral payment verification submitted',
-          })),
-          ...approvedReferralResponse.data.map(item => ({
-            ...item,
-            type: 'Approved Referral Payment',
-            status: 'approved',
-          })),
-          ...rejectedReferralResponse.data.map(item => ({
-            ...item,
-            type: 'Rejected Referral Payment',
-            status: 'rejected',
-            remarks: item.feedback || 'No feedback provided',
-          })),
-        ];
+        // Combine and sort transactions
+        const combinedTransactions = response.data.map((item) => ({
+          _id: item._id,
+          createdAt: item.createdAt,
+          transactionAmount: item.transactionAmount,
+          type: item.type,
+          status: item.status || 'pending',
+          remarks: item.remarks || 'No remarks provided.',
+        }));
 
-        // Sort transactions by date in descending order
         combinedTransactions.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
         setTransactions(combinedTransactions);
@@ -69,7 +55,7 @@ const DepositHistory = () => {
     };
 
     fetchTransactions();
-  }, [username]); // Dependency array includes username
+  }, [username]);
 
   const getStatusStyles = (status) => {
     switch (status) {

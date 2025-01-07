@@ -18,7 +18,7 @@ const Footer = () => {
         navigate('/payments/task-center'); // Navigate to Locate page
         break;
       case 2:
-        navigate('/payments/referral/plans'); // Navigate to Discounts page
+        navigate('/payments/referral/referral-link'); // Navigate to Discounts page
         break;
       case 3:
         navigate('/utilities/more'); // Navigate to Contact page

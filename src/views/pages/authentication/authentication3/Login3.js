@@ -1,5 +1,5 @@
 import React from 'react';
-import { CssBaseline, Container} from '@mui/material';
+
 import LoginForm from '../LoginForm';
 
 
@@ -7,15 +7,11 @@ const Login3 = () => {
  
  
   return (
-    <div>
-      <CssBaseline />
-      <Container maxWidth="100%" sx={{ padding: 0 }}>
-       
-          
-            <LoginForm />
-         
-      </Container>
-    </div>
+<div style={{ backgroundColor:'#062339'  , width: '100vw', height: '100vh', overflow: 'hidden' }}>
+  <LoginForm />
+</div>
+
+
   );
 };
 
