@@ -139,7 +139,7 @@ const ReferralPaymentVerification = () => {
             <input accept="image/*" id="image-upload" type="file" onChange={handleFileChange} style={{ display: 'none' }} />
             <label htmlFor="image-upload">
               <Button variant="outlined" component="span" sx={{ marginTop: 2 }}>
-                Upload Screenshot (Image)
+                Upload Screenshot (Payment Proof)
               </Button>
             </label>
             {image && (

@@ -7,6 +7,7 @@ import {
   Card,
   CardContent,
   CircularProgress,
+  Button, // Importing Button component
 } from '@mui/material';
 import { ArrowBack } from '@mui/icons-material';
 import axios from 'axios';
@@ -37,6 +38,10 @@ const Invest = () => {
     navigate('/payments/referral/upload');
   };
 
+  const handleGoToPaymentPage = () => {
+    navigate('/payment-accounts'); // Change '/payments' to your desired page URL
+  };
+
   return (
     <div>
       {/* Back Button */}
@@ -49,15 +54,39 @@ const Invest = () => {
           gutterBottom
           sx={{ marginLeft: 2, paddingTop: '7px', color: 'secondary.dark' }}
         >
-        Upgrade Account
+          Upgrade Account
         </Typography>
       </Box>
+
+      {/* Note Section */}
+      <Card sx={{ mb: 4, p: 2, backgroundColor: '#e3f2fd' }}>
+        <CardContent>
+          <Typography variant="h5" gutterBottom color="theme.palette.secondary.dark">
+            Important Note:
+          </Typography>
+          <Typography variant="body1" gutterBottom>
+         You must pay before activating your account.
+          </Typography>
+          <Typography variant="body1">
+            Once paid, Chose Plan upload your payment proof to complete the activation process.
+          </Typography>
+          {/* Button to go to the payment page */}
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleGoToPaymentPage}
+            sx={{ mt: 2 }}
+          >
+           Payment Accounts
+          </Button>
+        </CardContent>
+      </Card>
 
       {/* Already Paid Section */}
       <Card sx={{ mb: 4, p: 2, backgroundColor: '#fff8e1' }}>
         <CardContent>
           <Typography variant="h5" gutterBottom color="theme.palette.secondary.dark">
-          Upgrade Your Account:
+            Upgrade Your Account:
           </Typography>
           <Typography variant="body1" gutterBottom>
             Choose your investment plan below.

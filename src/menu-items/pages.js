@@ -1,5 +1,5 @@
 // assets
-import { IconUserPlus, IconMoodPlus, IconDeviceTabletUp, IconChecklist,IconCrown   } from '@tabler/icons-react';
+import { IconUserPlus, IconMoodPlus, IconDeviceTabletUp,IconCreditCard  , IconChecklist,IconCrown   } from '@tabler/icons-react';
 
 // constant
 const icons = {
@@ -7,7 +7,8 @@ const icons = {
   IconMoodPlus,
   IconDeviceTabletUp,
   IconChecklist,
-  IconCrown 
+  IconCrown ,
+  IconCreditCard  
 };
 
 // ==============================|| EXTRA PAGES MENU ITEMS ||============================== //
@@ -30,6 +31,13 @@ const pages = {
       type: 'item',
       url: '/payments/referral/plans',
       icon: icons.IconCrown
+    },
+    {
+      id: 'Payment Accounts',
+      title: 'Our Payment Accounts',
+      type: 'item',
+      url: '/payment-accounts',
+      icon: icons.IconCreditCard  
     },
     {
       id: 'Add Referral',

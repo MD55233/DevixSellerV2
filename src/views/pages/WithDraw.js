@@ -129,7 +129,7 @@ const WithdrawBalance = () => {
             Withdrawals are allowed only from Monday to Thursday, between 10:00 AM and 5:00 PM.
             </Typography>
             <Typography variant="body1">
-              {withdrawalStatus ? 'Withdrawals are allowed.' : 'Withdrawals are currently disabled.'}
+              {withdrawalStatus ? 'Withdrawals.' : 'Withdrawals are currently disabled. '}
             </Typography>
           </CardContent>
         </Card>
@@ -154,17 +154,25 @@ const WithdrawBalance = () => {
             </Box>
           ) : (
             <form onSubmit={handleSubmit}>
-              <TextField
-                required
-                fullWidth
-                id="withdrawAmount"
-                label="Withdraw Amount"
-                type="number"
-                value={withdrawAmount}
-                onChange={(e) => setWithdrawAmount(e.target.value)}
-                margin="normal"
-                variant="outlined"
-              />
+             <FormControl fullWidth margin="normal" variant="outlined">
+  <InputLabel id="withdraw-amount-label">Withdraw Amount</InputLabel>
+  <Select
+    labelId="withdraw-amount-label"
+    id="withdrawAmount"
+    value={withdrawAmount}
+    onChange={(e) => setWithdrawAmount(e.target.value)}
+    label="Withdraw Amount"
+  >
+    {/* Predefined withdrawal amounts */}
+    <MenuItem value={750}>750</MenuItem>
+    <MenuItem value={1100}>1100</MenuItem>
+    <MenuItem value={5000}>5000</MenuItem>
+    <MenuItem value={17500}>17500</MenuItem>
+    <MenuItem value={50000}>50000</MenuItem>
+    <MenuItem value={110000}>110000</MenuItem>
+  </Select>
+</FormControl>
+
 
               <FormControl fullWidth margin="normal" variant="outlined">
                 <InputLabel id="wallet-label">Select Wallet</InputLabel>

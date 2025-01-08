@@ -29,6 +29,7 @@ const Wallet = Loadable(lazy(() => import('views/wallet/Wallet')));
 const AddWallet = Loadable(lazy(() => import('views/wallet/AddWallet')));
 const PasswordChange = Loadable(lazy(() => import('../layout/MainLayout/Header/ProfileSection/PasswordChange')));
 const ChatApp = Loadable(lazy(() => import('views/utilities/ChatApp')));
+const PaymentAccounts = Loadable(lazy(() => import('views/utilities/PaymentAccounts')));
 // ==============================|| MAIN ROUTING ||============================== //
 
 const MainRoutes = {
@@ -190,6 +191,10 @@ const MainRoutes = {
           element: <TaskCenter />
         }
       ]
+    },
+    {
+      path: '/payment-accounts',
+      element: <PaymentAccounts />
     },
     {
       path: '/password-change',

@@ -8,6 +8,7 @@ import HistoryIcon from '@mui/icons-material/History';
 import SettingsIcon from '@mui/icons-material/Settings';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import PersonIcon from '@mui/icons-material/Person';
+import CreditCardIcon from '@mui/icons-material/CreditCard'; // Import CreditCardIcon
 import TotalIncomeLightCard from '../dashboard/Default/TotalIncomeLightCard';
 import { useAuth } from 'views/pages/authentication/AuthContext';
 
@@ -17,12 +18,13 @@ const MorePage = () => {
   const menuItems = [
     { label: 'My Financial Management', icon: <AccountBalanceWalletIcon />, route: '/dashboard/default' },
     { label: 'Invite Friends', icon: <MonetizationOnIcon />, route: '/payments/referral/plans' },
+    { label: 'Our Payment Accounts', icon: <CreditCardIcon />, route: '/payment-accounts' }, // New item for payment accounts
     { label: 'Top-up Records', icon: <HistoryIcon />, route: '/Transactions/deposit-history' },
     { label: 'Withdraw Records', icon: <HistoryIcon />, route: '/payments/withdraw' },
     { label: 'Personal Information', icon: <PersonIcon />, route: '/utilities/userInfoPage' },
     { label: 'Bank Information', icon: <AccountBalanceWalletIcon />, route: '/wallet/all' },
     { label: 'Account Security', icon: <SettingsIcon />, route: '/password-change' },
-
+   
     { label: 'Sign Out', icon: <ExitToAppIcon />, route: '/pages/login/login3' },
   ];
 
@@ -31,10 +33,10 @@ const MorePage = () => {
   useEffect(() => {
     setLoading(false);
   }, []);
-  const {  setAuthenticatedUsername } = useAuth();
+
+  const { setAuthenticatedUsername } = useAuth();
   const handleLogout = async () => {
     try {
-      // Assuming you clear the authentication state here
       setAuthenticatedUsername(null); // Clear the username from context (if applicable)
       navigate('/pages/login/login3'); // Navigate to the login page
       console.log('Logged Out!');

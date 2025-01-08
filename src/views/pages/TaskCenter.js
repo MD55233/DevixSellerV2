@@ -60,6 +60,13 @@ const TaskCenter = ({ apiBaseUrl }) => {
   }, [username, apiBaseUrl]);
 
   const handleCompleteTask = async (taskId) => {
+    // Check if today is Sunday (0 represents Sunday in JavaScript's Date object)
+    const today = new Date();
+    if (today.getDay() === 0) { // Sunday is represented by 0
+      alert('Task completion is not allowed on Sundays.');
+      return; // Exit the function if it's Sunday
+    }
+  
     setLoadingTask(true);
     setOpenDialog(true);
   
@@ -158,6 +165,11 @@ const TaskCenter = ({ apiBaseUrl }) => {
             </Card>
           </Grid>
         ))}
+         <Box sx={{ mt: 3, padding: '10px', backgroundColor: '#FFEBEE', borderRadius: '8px' }}>
+          <Typography variant="body2" color="error">
+            Note: Stay on the redirected website for 15 seconds to get the bonus.
+          </Typography>
+        </Box>
       </Grid>
 
       {/* Task Completion Dialog */}
