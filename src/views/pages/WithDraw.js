@@ -126,7 +126,7 @@ const WithdrawBalance = () => {
         <Card sx={{ backgroundColor: withdrawalStatus ? '#13E880' : '#F44336', color: 'white' }}>
           <CardContent>
             <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-            Withdrawals are allowed only from Monday to Thursday, between 10:00 AM and 10:00 PM.
+            Withdrawals are allowed only from Monday to Thursday, between 10:00 AM and 5:00 PM.
             </Typography>
             <Typography variant="body1">
               {withdrawalStatus ? 'Withdrawals are allowed.' : 'Withdrawals are currently disabled.'}
