@@ -1,7 +1,45 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardMedia, CardContent, Typography, Button, Dialog, DialogContent, CircularProgress, IconButton, Grid } from '@mui/material';
+import {
+  Card,
+  CardMedia,
+  CardContent,
+  Typography,
+  Button,
+  Dialog,
+  DialogContent,
+  CircularProgress,
+  IconButton,
+  Grid,
+} from '@mui/material';
 import axios from 'axios';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy'; // Import the copy icon
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+
+// Import images
+import SadaPayImage from './accountimg/sadapay.png';
+import JazzCashImage from './accountimg/jazzcash.png';
+import EasyPaisaImage from './accountimg/easypaisa.png';
+import NayaPayImage from './accountimg/nayapay.png';
+import UBLImage from './accountimg/ubl.png';
+import HBLImage from './accountimg/hbl.png';
+import UPaisaImage from './accountimg/upaisa.png';
+import MCBImage from './accountimg/mcb.png';
+import AlliedImage from './accountimg/allied.png';
+import MeezanImage from './accountimg/meezan.png';
+import DefaultImage from './accountimg/default.png';
+
+// Map images to platforms
+const platformImages = {
+  SadaPay: SadaPayImage,
+  JazzCash: JazzCashImage,
+  EasyPaisa: EasyPaisaImage,
+  NayaPay: NayaPayImage,
+  UBL: UBLImage,
+  HBL: HBLImage,
+  UPaisa: UPaisaImage,
+  MCB: MCBImage,
+  Allied: AlliedImage,
+  Meezan: MeezanImage,
+};
 
 const PaymentAccounts = () => {
   const [accounts, setAccounts] = useState([]);
@@ -11,7 +49,7 @@ const PaymentAccounts = () => {
   // Fetch all payment accounts
   const fetchPaymentAccounts = async () => {
     try {
-      const response = await axios.get(`${process.env.REACT_APP_API_HOST}/payment-accounts`); // Replace with your actual API endpoint
+      const response = await axios.get('https://api1.laikostar.com/payment-accounts'); // Replace with your actual API endpoint
       setAccounts(response.data);
     } catch (error) {
       console.error('Error fetching payment accounts:', error);
@@ -62,7 +100,7 @@ const PaymentAccounts = () => {
                 <CardMedia
                   component="img"
                   height="140"
-                  image={account.platformImage || 'default-image-url.png'} // Fallback image
+                  image={platformImages[account.platform] || DefaultImage}
                   alt={account.platform}
                   style={{ objectFit: 'contain', padding: '10px' }}
                 />
@@ -87,15 +125,15 @@ const PaymentAccounts = () => {
         >
           <DialogContent>
             <div style={{ textAlign: 'center', padding: '20px' }}>
-              <CardMedia
-                component="img"
-                height="140"
-                image={selectedAccount.platformImage || 'default-image-url.png'} // Fallback image
-                alt={selectedAccount.platform}
-                style={{ objectFit: 'contain', marginBottom: '20px' }}
-              />
               <Typography variant="h5">{selectedAccount.platform}</Typography>
-              <div style={{ marginTop: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div
+                style={{
+                  marginTop: '10px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
                 <Typography variant="body1" style={{ marginRight: '10px' }}>
                   <strong>Title:</strong> {selectedAccount.accountTitle}
                 </Typography>
@@ -103,7 +141,14 @@ const PaymentAccounts = () => {
                   <ContentCopyIcon />
                 </IconButton>
               </div>
-              <div style={{ marginTop: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div
+                style={{
+                  marginTop: '10px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
                 <Typography variant="body1" style={{ marginRight: '10px' }}>
                   <strong>Account #:</strong> {selectedAccount.accountNumber}
                 </Typography>

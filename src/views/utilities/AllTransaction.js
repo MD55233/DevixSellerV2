@@ -65,7 +65,9 @@ const TransactionHistory = () => {
           ...approvedReferralResponse.data.map(item => ({
             ...item,
             type: 'Approved Referral Payment',
+            amount: item.transactionAmount,
             status: 'approved',
+            remarks: 'Approved',
           })),
           ...rejectedReferralResponse.data.map(item => ({
             ...item,

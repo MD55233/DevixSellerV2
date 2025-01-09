@@ -96,21 +96,38 @@ const WithdrawBalance = () => {
           Authorization: `Bearer ${token}`, // Include the token in the Authorization header
         },
       });
+  
       console.log('Withdrawal request submitted:', response.data);
-      
-      // Reset form state after submission
+  
+      // Handle success response
       setWithdrawAmount('');
       setSelectedWallet('');
       setAccountNumber(''); // Reset account number
       setAccountTitle(''); // Reset account title
       setShowSuccess(true); // Show success message in dialog
     } catch (error) {
-      console.error('Error submitting withdrawal request:', error);
-      setErrorMessage('Error submitting form. Please try again.');
-      setDialogOpen(false); // Close the dialog in case of error
+      // Handle specific error messages from the backend
+      if (error.response) {
+        const { status, data } = error.response;
+  
+        if (status === 400) {
+          setErrorMessage(data.message || 'Bad request. Please check your input.');
+        } else if (status === 403) {
+          setErrorMessage(data.message || 'Withdrawals are not allowed at this time.');
+        } else if (status === 404) {
+          setErrorMessage(data.message || 'User not found.');
+        } else {
+          setErrorMessage('An unexpected error occurred. Please try again.');
+        }
+      } else {
+        setErrorMessage('Unable to connect to the server. Please check your internet connection.');
+      }
+  
+      // Close the confirmation dialog in case of error
+      setDialogOpen(false);
     }
   };
-
+  
   const handleCancel = () => {
     setDialogOpen(false); // Close the dialog without taking action
   };

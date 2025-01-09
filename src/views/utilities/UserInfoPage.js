@@ -108,7 +108,7 @@ const UserInfoPage = () => {
             <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px', color: green[700] }}>
               <LocationOnIcon />
               <Typography variant="body2">
-                {location || 'Location not available'}
+                {location || 'Pakistan'}
               </Typography>
             </Box>
           </Grid>

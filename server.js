@@ -29,10 +29,12 @@ const transporter = nodemailer.createTransport({
 
 // Generate Random Username and Password
 const generateCredentials = () => {
-  const username = `user${Math.floor(1000 + Math.random() * 9000)}`;
-  const password = Math.random().toString(36).slice(-8);
+  const username = `user${Math.floor(1000 + Math.random() * 9000)}${Math.random().toString(36).substring(2, 4)}`; // e.g., user1234ab
+  const password = `${Math.random().toString(36).substring(2, 6)}${Math.floor(10 + Math.random() * 90)}`; // e.g., abcd42
+
   return { username, password };
 };
+
 
 // ------------||Serve static files from the 'uploads' directory||----------------------
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
@@ -162,6 +164,8 @@ app.get('/api/transaction-history/:username', async (req, res) => {
     res.status(500).json({ message: 'Internal server error.' });
   }
 });
+
+
 app.post('/api/signup', async (req, res) => {
   const { fullName, email, phoneNumber, referrerPin } = req.body;
 
@@ -233,7 +237,7 @@ app.post('/api/signup', async (req, res) => {
       return res.status(400).json({ success: false, message: 'try again 222' });
     }
     console.error(err);
-    res.status(500).json({ success: false, message: 'Server 333Error' });
+    res.status(500).json({ success: false, message: 'Server 333 Error' });
   }
 });
 // Route to fetch all data of a user based on username
