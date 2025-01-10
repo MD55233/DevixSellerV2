@@ -14,7 +14,7 @@ const ReferralLink = () => {
   const { username } = useAuth();
 
   const referralLink = username
-    ? `https://account.laikostar.com/pages/register/register3/${username}`
+    ? `https://pk.laikostar.com/pages/register/register3/${username}`
     : 'Username not available';
 
   const handleCopyReferralLink = () => {

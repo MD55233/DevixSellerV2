@@ -40,7 +40,7 @@ const DepositHistory = () => {
           transactionAmount: item.transactionAmount,
           type: item.type,
           status: item.status || 'pending',
-          remarks: item.remarks || 'No remarks provided.',
+          remarks: item.reason || 'No remarks provided.',
         }));
 
         combinedTransactions.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));

@@ -102,7 +102,7 @@ const Invest = () => {
           </Grid>
         ) : (
           plans.map((plan, index) => (
-            <Grid item xs={12} sm={6} md={4} key={index}>
+            <Grid item xs={11} sm={5} md={4} key={index}>
               <InvestCard
                 plan={plan}
                 onClick={() => handlePlanClick(plan)}

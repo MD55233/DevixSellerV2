@@ -72,8 +72,9 @@ const TransactionHistory = () => {
           ...rejectedReferralResponse.data.map(item => ({
             ...item,
             type: 'Rejected Referral Payment',
+            amount: item.transactionAmount,
             status: 'rejected',
-            remarks: item.feedback || 'No feedback provided', // Include feedback in remarks for rejected payments
+            remarks: item.reason || 'No feedback provided', // Include feedback in remarks for rejected payments
           })),
           ...taskTransactionsResponse.data.map(item => ({
             ...item,
@@ -105,6 +106,8 @@ const TransactionHistory = () => {
   const getStatusStyles = (status) => {
     switch (status) {
       case 'approved':
+        return { backgroundColor: '#d4edda', color: '#155724' }; // Light green background
+      case 'completed':
         return { backgroundColor: '#d4edda', color: '#155724' }; // Light green background
       case 'rejected':
         return { backgroundColor: '#f8d7da', color: '#721c24' }; // Light red background

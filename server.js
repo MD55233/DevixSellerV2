@@ -748,7 +748,7 @@ app.post('/api/referral-payment/upload', uploadReferral, async (req, res) => {
 app.get('/api/referral-payment/:username', async (req, res) => {
   try {
     const { username } = req.params;
-    const payments = await ReferralPaymentVerification.find({ username }).populate('referrer', 'username');
+    const payments = await ReferralPaymentVerification.find({ username });
     res.json(payments);
   } catch (error) {
     console.error('Error fetching referral payments:', error);
@@ -1146,7 +1146,7 @@ app.post('/api/withdraw-balance', checkWithdrawalStatus, async (req, res) => {
     const currentHour = now.getHours(); // 0 to 23
 
     // Check if the current day and time are within the allowed range
-    if (currentDay < 1 || currentDay > 4 || currentHour < 10 || currentHour >= 17) {
+    if (currentDay < 1 || currentDay > 4 || currentHour < 10 || currentHour >= 16) {
       return res.status(403).json({
         message: 'Withdrawals are allowed only from Monday to Thursday, between 10:00 AM and 5:00 PM.'
       });

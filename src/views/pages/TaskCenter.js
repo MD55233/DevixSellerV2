@@ -26,6 +26,7 @@ const TaskCenter = ({ apiBaseUrl }) => {
   const [tasks, setTasks] = useState([]);
   const [loadingTask, setLoadingTask] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
+  const [taskMessage, setTaskMessage] = useState('');
   const { username } = useAuth(); // Using useAuth for user data
 
   // Fetch user data and tasks on component load
@@ -60,51 +61,51 @@ const TaskCenter = ({ apiBaseUrl }) => {
   }, [username, apiBaseUrl]);
 
   const handleCompleteTask = async (taskId) => {
-    // Check if today is Sunday (0 represents Sunday in JavaScript's Date object)
+    // Check if today is Sunday
     const today = new Date();
-    if (today.getDay() === 0) { // Sunday is represented by 0
+    if (today.getDay() === 0) {
       alert('Task completion is not allowed on Sundays.');
-      return; // Exit the function if it's Sunday
+      return;
     }
-  
+
     setLoadingTask(true);
     setOpenDialog(true);
-  
+    setTaskMessage('Processing task... Please wait.');
+
     try {
       const response = await axios.post(
         `${process.env.REACT_APP_API_HOST}/api/tasks/${taskId}/complete`,
         { username }
       );
-  
-      // Get the redirect link from the response
+
       const { redirectLink } = response.data;
-  
+
       // Remove the completed task from the list
       setTasks((prevTasks) => prevTasks.filter((task) => task._id !== taskId));
-  
-      // Update the user data (completedTasks count)
+
+      // Update the user data
       setUserData((prevData) => ({
         ...prevData,
         completedTasks: prevData.completedTasks + 1,
       }));
-  
-      // Redirect to the task's URL after completion
+
+      // Set success message and redirect
+      setTaskMessage('Wait for 10s on other site then comeback and Claim Bonus! Redirecting...');
       if (redirectLink) {
         setTimeout(() => {
-          window.location.href = redirectLink; // Redirect after showing success dialog
-        }, 2000); // Wait for the dialog to close
+          window.location.href = redirectLink;
+        }, 2000); // Redirect after a slight delay
       }
     } catch (error) {
       console.error('Error completing task:', error);
+      setTaskMessage('An error occurred while completing the task.');
     } finally {
       setLoadingTask(false);
-      setOpenDialog(false);
     }
   };
-  
+
   return (
     <Box p={2}>
-      {/* User Summary Section */}
       <Card sx={{ mb: 3, p: 2, borderRadius: '16px', backgroundColor: '#E8F5E9' }}>
         <Typography variant="h6" align="center" gutterBottom>
           Task Center
@@ -131,7 +132,6 @@ const TaskCenter = ({ apiBaseUrl }) => {
         </Grid>
       </Card>
 
-      {/* Task List Section */}
       <Typography variant="h6" gutterBottom>
         Available Tasks
       </Typography>
@@ -156,7 +156,7 @@ const TaskCenter = ({ apiBaseUrl }) => {
                 variant="contained"
                 color="success"
                 startIcon={<TaskIcon />}
-                sx={{ mt: 2 }}
+                sx={{ color: 'white',mt: 2 }}
                 fullWidth
                 onClick={() => handleCompleteTask(task._id)}
               >
@@ -165,33 +165,26 @@ const TaskCenter = ({ apiBaseUrl }) => {
             </Card>
           </Grid>
         ))}
-         <Box sx={{ mt: 3, padding: '10px', backgroundColor: '#FFEBEE', borderRadius: '8px' }}>
-          <Typography variant="body2" color="error">
-            Note: Stay on the redirected website for 15 seconds to get the bonus.
-          </Typography>
-        </Box>
       </Grid>
 
-      {/* Task Completion Dialog */}
-      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+      <Dialog open={openDialog}>
         <DialogContent sx={{ textAlign: 'center', p: 4 }}>
           {loadingTask ? (
             <>
               <CircularProgress color="success" />
               <Typography variant="body1" mt={2}>
-                Processing task... Please wait.
-                
+                {taskMessage}
               </Typography>
-              <Typography variant="body1" mt={2} color="error">
-        Note: Stay on the redirected website for 15 seconds to get the bonus.
-      </Typography>
             </>
           ) : (
             <>
               <CheckCircleIcon color="success" sx={{ fontSize: '4rem' }} />
               <Typography variant="h6" mt={2}>
-                Task Completed Successfully&excl;
+                {taskMessage} 
               </Typography>
+              <Button variant="contained" color="primary" sx={{ mt: 2 }} onClick={() => setOpenDialog(false)}>
+                Close
+              </Button>
             </>
           )}
         </DialogContent>

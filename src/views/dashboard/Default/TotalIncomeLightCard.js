@@ -50,7 +50,7 @@ const TotalIncomeLightCard = () => {
     email: '',
     phoneNumber: '',
     profilePicture: '',
-    referredBy: '',
+    referralCode: '',
   });
   const [modalOpen, setModalOpen] = useState(false);
   const [updatedData, setUpdatedData] = useState({});
@@ -59,7 +59,6 @@ const TotalIncomeLightCard = () => {
     const fetchData = async () => {
       if (username) {
         await fetchUserProfile();
-        await fetchParentName();
       }
     };
 
@@ -70,24 +69,15 @@ const TotalIncomeLightCard = () => {
     try {
       const response = await axios.get(`${process.env.REACT_APP_API_HOST}/api/user/${username}`);
       const user = response.data.user;
-      setUserData(user);
+      setUserData({
+        ...user,
+        referralCode: user.referralDetails?.referralCode || 'N/A',
+      });
       setUpdatedData(user);
     } catch (error) {
       console.error('Error fetching user profile:', error);
     } finally {
       setLoading(false); // Ensure loading is set to false after fetching
-    }
-  };
-
-  const fetchParentName = async () => {
-    try {
-      const response = await axios.get(`${process.env.REACT_APP_API_HOST}/api/user/${username}/parent`);
-      setUserData((prevData) => ({
-        ...prevData,
-        referredBy: response.data.parent.fullName || response.data.parent.username,
-      }));
-    } catch (error) {
-      console.error('Error fetching parent name:', error);
     }
   };
 
@@ -162,7 +152,7 @@ const TotalIncomeLightCard = () => {
           sx={{ width: 70, height: 70, mb: 2 }}
         />
         <Typography variant="h5">{userData.fullName || 'Your Name'}</Typography>
-        <Typography variant="subtitle2">Referred by: {userData.referredBy || 'N/A'}</Typography>
+        <Typography variant="subtitle2">Referral: {userData.referralCode}</Typography>
         <Button variant="contained" color="primary" onClick={handleEditProfile}>
           Edit Profile
         </Button>

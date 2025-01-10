@@ -86,7 +86,7 @@ const EarningCard = ({ isLoading }) => {
                   marginBottom: '4px',
                 }}
               >
-                Commission
+                Pending
               </Typography>
               <Typography
                 sx={{
