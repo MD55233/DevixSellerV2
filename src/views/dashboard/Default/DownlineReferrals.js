@@ -27,6 +27,20 @@ const DownlineReferrals = () => {
     fetchDownlines();
   }, [username]);
 
+  const getStatusStyles = (status) => {
+    switch (status) {
+     
+      case 'Activated':
+        return { backgroundColor: '#d4edda', color: '#155724' }; // Light green background
+      case 'Account not activated':
+        return { backgroundColor: '#f8d7da', color: '#721c24' }; // Light red background
+      case 'More than one account activated':
+        return { backgroundColor: '#fff3cd', color: '#856404' }; // Light yellow background
+      default:
+        return { backgroundColor: '#ffffff', color: '#000000' }; // Default white background
+    }
+  };
+
   return (
     <Box sx={{ p: 3 }}>
       <Typography variant="h4" gutterBottom>
@@ -55,7 +69,23 @@ const DownlineReferrals = () => {
                     <ListItem key={ref.username}>
                       <ListItemText
                         primary={`${ref.fullName} (${ref.username})`}
-                        secondary={ref.email}
+                        secondary={
+                          <>
+                            <Typography variant="body2">Email: {ref.email}</Typography>
+                            <Typography variant="body2">Plan: {ref.planName || 'Not Activated'}</Typography>
+                            <Typography variant="body2">Balance: ${ref.balance || '0.00'}</Typography>
+                            <Box sx={{
+                        ...getStatusStyles(ref.planStatus),
+                        padding: '4px 8px',
+                        borderRadius: '4px',
+                        display: 'inline-block'
+                      }}>
+                        {ref.planStatus}
+                      </Box>
+                       {/* Separator Line */}
+      <Box sx={{ borderTop: '1px solid #ccc', my: 1 }} />
+                          </>
+                        }
                       />
                     </ListItem>
                   ))}
@@ -86,7 +116,25 @@ const DownlineReferrals = () => {
                     <ListItem key={ref.username}>
                       <ListItemText
                         primary={`${ref.fullName} (${ref.username})`}
-                        secondary={ref.email}
+                        secondary={
+                          <>
+                            <Typography variant="body2">Email: {ref.email}</Typography>
+                            <Typography variant="body2">Plan Activated: {ref.planName || 'No Plan'}</Typography>
+                            <Typography variant="body2">Balance: ${ref.balance || '0.00'}</Typography>
+                            <Box sx={{
+                        ...getStatusStyles(ref.planStatus),
+                        padding: '4px 8px',
+                        borderRadius: '4px',
+                        display: 'inline-block'
+                      }}>
+                        {ref.planStatus}
+                      </Box>
+
+                       {/* Separator Line */}
+      <Box sx={{ borderTop: '1px solid #ccc', my: 1 }} />
+
+                          </>
+                        }
                       />
                     </ListItem>
                   ))}

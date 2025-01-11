@@ -1425,8 +1425,6 @@ app.get('/payment-accounts', async (req, res) => {
 
 
 
-
-// Route to fetch direct and indirect downlines
 app.get('/api/referrals/downline/:username', async (req, res) => {
   const { username } = req.params;
 
@@ -1440,23 +1438,42 @@ app.get('/api/referrals/downline/:username', async (req, res) => {
 
     const userId = user._id;
 
-    // Fetch direct downlines (users whose referrer matches the logged-in user's _id)
+    // Fetch direct downlines
     const directReferrals = await User.find(
       { 'referralDetails.referrer': userId },
-      'fullName username email'
+      'fullName username email dailyTaskLimit'
     ).exec();
 
-    // Fetch indirect downlines (users whose referrer matches any of the direct referral IDs)
+    // Fetch indirect downlines
     const directReferralIds = directReferrals.map((u) => u._id);
-
     const indirectReferrals = await User.find(
       { 'referralDetails.referrer': { $in: directReferralIds } },
-      'fullName username email'
+      'fullName username email dailyTaskLimit'
     ).exec();
 
+    // Fetch all plans for comparison
+    const plans = await Plan.find().exec();
+
+    const enrichUserWithPlanStatus = (user) => {
+      if (user.dailyTaskLimit === 0) {
+        return { ...user.toObject(), planStatus: 'Account not activated', planName: null };
+      }
+
+      const matchedPlan = plans.find((plan) => plan.DailyTaskLimit === user.dailyTaskLimit);
+
+      if (matchedPlan) {
+        return { ...user.toObject(), planStatus: 'Activated', planName: matchedPlan.name };
+      } else {
+        return { ...user.toObject(), planStatus: 'More than one account activated', planName: null };
+      }
+    };
+
+    const enrichedDirectReferrals = directReferrals.map(enrichUserWithPlanStatus);
+    const enrichedIndirectReferrals = indirectReferrals.map(enrichUserWithPlanStatus);
+
     res.status(200).json({
-      directReferrals,
-      indirectReferrals,
+      directReferrals: enrichedDirectReferrals,
+      indirectReferrals: enrichedIndirectReferrals,
     });
   } catch (error) {
     console.error('Error fetching downlines:', error);
