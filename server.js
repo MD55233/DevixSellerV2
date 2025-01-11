@@ -367,7 +367,6 @@ app.get('/api/tasks', async (req, res) => {
   
 });
 
-
 app.post('/api/tasks/:taskId/complete', async (req, res) => {
   const { taskId } = req.params;
   const { username } = req.body;
@@ -415,6 +414,50 @@ app.post('/api/tasks/:taskId/complete', async (req, res) => {
     });
 
     await transaction.save();
+
+    // Process referral bonuses
+    if (user.referralDetails && user.referralDetails.referrer) {
+      const firstLevelReferrer = await User.findById(user.referralDetails.referrer);
+      if (firstLevelReferrer) {
+        const firstLevelBonus = task.reward * 0.14; // 6% for first-level referrer
+        firstLevelReferrer.pendingCommission += firstLevelBonus;
+
+        // Add a transaction for the first-level referrer
+        firstLevelReferrer.transactionHistory.push({
+          type: 'credit',
+          amount: firstLevelBonus,
+          description: `First-level referral commission for task: ${task.name} completed by ${user.username}`,
+        });
+
+        await firstLevelReferrer.save();
+
+        // Process second-level referral
+        if (firstLevelReferrer.referralDetails && firstLevelReferrer.referralDetails.referrer) {
+          const secondLevelReferrer = await User.findById(firstLevelReferrer.referralDetails.referrer);
+          if (secondLevelReferrer) {
+            const secondLevelBonus = task.reward * 0.06; // 3% for second-level referrer
+            secondLevelReferrer.pendingCommission += secondLevelBonus;
+
+            // Add a transaction for the second-level referrer
+            secondLevelReferrer.transactionHistory.push({
+              type: 'credit',
+              amount: secondLevelBonus,
+              description: `Second-level referral commission for task: ${task.name} completed by ${user.username}`,
+            });
+
+            await secondLevelReferrer.save();
+          }
+        }
+      }
+    }
+
+    // Save task history for the user
+    user.taskHistory.push({
+      taskId: task._id,
+      completedAt: new Date(),
+      reward: task.reward,
+    });
+
     await task.save();
     await user.save();
 
@@ -427,6 +470,7 @@ app.post('/api/tasks/:taskId/complete', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error', details: error.message });
   }
 });
+
 
 // Create a new task with an image upload
 app.post('/api/tasks', uploadFile.single('image'), async (req, res) => {
@@ -1375,5 +1419,47 @@ app.get('/payment-accounts', async (req, res) => {
     res.status(200).json(accounts);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching payment accounts', error });
+  }
+});
+
+
+
+
+
+// Route to fetch direct and indirect downlines
+app.get('/api/referrals/downline/:username', async (req, res) => {
+  const { username } = req.params;
+
+  try {
+    // Find the user by username to get their _id
+    const user = await User.findOne({ username }).exec();
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const userId = user._id;
+
+    // Fetch direct downlines (users whose referrer matches the logged-in user's _id)
+    const directReferrals = await User.find(
+      { 'referralDetails.referrer': userId },
+      'fullName username email'
+    ).exec();
+
+    // Fetch indirect downlines (users whose referrer matches any of the direct referral IDs)
+    const directReferralIds = directReferrals.map((u) => u._id);
+
+    const indirectReferrals = await User.find(
+      { 'referralDetails.referrer': { $in: directReferralIds } },
+      'fullName username email'
+    ).exec();
+
+    res.status(200).json({
+      directReferrals,
+      indirectReferrals,
+    });
+  } catch (error) {
+    console.error('Error fetching downlines:', error);
+    res.status(500).json({ error: 'Internal Server Error', details: error.message });
   }
 });

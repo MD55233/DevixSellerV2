@@ -6,7 +6,7 @@ import EarningCard from './EarningCard';
 import UpgradeAccountCard from './UpgradeAccountCard';
 import NavigationPanel from './NavigationPanel';
 import { gridSpacing } from 'store/constant';
-
+import DownlineReferrals from './DownlineReferrals';
 
 // ==============================|| DEFAULT DASHBOARD ||============================== //
 
@@ -28,6 +28,7 @@ const Dashboard = () => {
       </Grid>
       <Grid item  xs={12}>
       <UpgradeAccountCard isLoading={false} onUpgradeClick={handleUpgradeClick} />;
+      <DownlineReferrals isLoading={isLoading} />
           </Grid>
     
     </Grid>

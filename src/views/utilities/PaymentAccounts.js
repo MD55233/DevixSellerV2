@@ -45,6 +45,7 @@ const PaymentAccounts = () => {
   const [accounts, setAccounts] = useState([]);
   const [selectedAccount, setSelectedAccount] = useState(null); // For modal/dialog
   const [loading, setLoading] = useState(true); // Loading state
+  const [dialogLoading, setDialogLoading] = useState(false); // Dialog loading state
 
   // Fetch all payment accounts
   const fetchPaymentAccounts = async () => {
@@ -74,6 +75,17 @@ const PaymentAccounts = () => {
     );
   };
 
+  // Handle dialog open
+  const handleOpenDialog = (account) => {
+    setDialogLoading(true);
+    setSelectedAccount(account);
+
+    // Simulate loading time for dialog
+    setTimeout(() => {
+      setDialogLoading(false);
+    }, 3000); // 3 seconds
+  };
+
   return (
     <div style={{ padding: '20px' }}>
       <Typography variant="h4" gutterBottom>
@@ -95,7 +107,7 @@ const PaymentAccounts = () => {
                   cursor: 'pointer',
                   boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.2)',
                 }}
-                onClick={() => setSelectedAccount(account)} // Open modal on click
+                onClick={() => handleOpenDialog(account)} // Open modal with loading
               >
                 <CardMedia
                   component="img"
@@ -124,47 +136,56 @@ const PaymentAccounts = () => {
           fullWidth
         >
           <DialogContent>
-            <div style={{ textAlign: 'center', padding: '20px' }}>
-              <Typography variant="h5">{selectedAccount.platform}</Typography>
-              <div
-                style={{
-                  marginTop: '10px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <Typography variant="body1" style={{ marginRight: '10px' }}>
-                  <strong>Title:</strong> {selectedAccount.accountTitle}
+            {dialogLoading ? (
+              <div style={{ textAlign: 'center', padding: '20px' }}>
+                <CircularProgress size={40} />
+                <Typography variant="body1" style={{ marginTop: '20px' }}>
+                  Genrating Payment Account...
                 </Typography>
-                <IconButton onClick={() => copyToClipboard(selectedAccount.accountTitle)}>
-                  <ContentCopyIcon />
-                </IconButton>
               </div>
-              <div
-                style={{
-                  marginTop: '10px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <Typography variant="body1" style={{ marginRight: '10px' }}>
-                  <strong>Account #:</strong> {selectedAccount.accountNumber}
-                </Typography>
-                <IconButton onClick={() => copyToClipboard(selectedAccount.accountNumber)}>
-                  <ContentCopyIcon />
-                </IconButton>
+            ) : (
+              <div style={{ textAlign: 'center', padding: '20px' }}>
+                <Typography variant="h5">{selectedAccount.platform}</Typography>
+                <div
+                  style={{
+                    marginTop: '10px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Typography variant="body1" style={{ marginRight: '10px' }}>
+                    <strong>Title:</strong> {selectedAccount.accountTitle}
+                  </Typography>
+                  <IconButton onClick={() => copyToClipboard(selectedAccount.accountTitle)}>
+                    <ContentCopyIcon />
+                  </IconButton>
+                </div>
+                <div
+                  style={{
+                    marginTop: '10px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Typography variant="body1" style={{ marginRight: '10px' }}>
+                    <strong>Account #:</strong> {selectedAccount.accountNumber}
+                  </Typography>
+                  <IconButton onClick={() => copyToClipboard(selectedAccount.accountNumber)}>
+                    <ContentCopyIcon />
+                  </IconButton>
+                </div>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  style={{ marginTop: '20px' }}
+                  onClick={() => setSelectedAccount(null)}
+                >
+                  Close
+                </Button>
               </div>
-              <Button
-                variant="contained"
-                color="primary"
-                style={{ marginTop: '20px' }}
-                onClick={() => setSelectedAccount(null)}
-              >
-                Close
-              </Button>
-            </div>
+            )}
           </DialogContent>
         </Dialog>
       )}
