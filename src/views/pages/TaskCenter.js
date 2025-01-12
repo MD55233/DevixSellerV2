@@ -63,7 +63,7 @@ const TaskCenter = ({ apiBaseUrl }) => {
   const handleCompleteTask = async (taskId) => {
     // Check if today is Sunday
     const today = new Date();
-    if (today.getDay() === 3) {
+    if (today.getDay() === 0) {
       alert('Task completion is not allowed on Sundays.');
       return;
     }
