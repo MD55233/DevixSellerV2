@@ -757,8 +757,19 @@ const uploadReferral = multer({ storage: referralStorage }).single('image'); // 
 
 // API Routes
 
+
 app.post('/api/referral-payment/upload', uploadReferral, async (req, res) => {
-  const { username, transactionId, transactionAmount, gateway, planName, planPrice, directBonus, indirectBonus, DailyTaskLimit } = req.body;
+  const { 
+    username, 
+    transactionId, 
+    transactionAmount, 
+    gateway, 
+    planName, 
+    planPrice, 
+    directBonus, 
+    indirectBonus, 
+    DailyTaskLimit 
+  } = req.body;
 
   // Validate required fields, including the image
   if (!username || !transactionId || !transactionAmount || !gateway || !planName || !planPrice || !directBonus || !indirectBonus || !DailyTaskLimit || !req.file) {
@@ -766,6 +777,17 @@ app.post('/api/referral-payment/upload', uploadReferral, async (req, res) => {
   }
 
   try {
+    // Check if transactionId exists in pending or approved
+    const existingTransaction = await ReferralPaymentVerification.findOne({ transactionId });
+    const existingApprovedTransaction = await ReferralApproveds.findOne({ transactionId });
+
+    if (existingTransaction || existingApprovedTransaction) {
+      return res.status(400).json({
+        message: 'Transaction ID already exists in pending or approved status. If you have any issues, please contact support.'
+      });
+    }
+
+    // Create a new referral payment verification record
     const newPayment = new ReferralPaymentVerification({
       username,
       transactionId,
@@ -776,17 +798,45 @@ app.post('/api/referral-payment/upload', uploadReferral, async (req, res) => {
       directBonus,
       indirectBonus,
       DailyTaskLimit,
-      imagePath: req.file.path  // Correctly saving the file path
+      imagePath: req.file.path // Correctly saving the file path
     });
 
     await newPayment.save();
 
-    res.json({ message: 'Referral payment request uploaded successfully.' });
+    // Send Email Notification
+    const user = await User.findOne({ username });
+    if (user && user.email) {
+      await transporter.sendMail({
+        from: `LaikoStar.Team <${process.env.SMTP_EMAIL}>`,
+        to: user.email,
+        subject: 'Referral Payment Submission Received',
+        html: `
+          <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+            <h2 style="color: #4CAF50; text-align: center;">Payment Submission Received</h2>
+            <p>Dear ${user.fullName},</p>
+            <p>We have successfully received your referral payment submission. Here are the details:</p>
+            <div style="border: 1px solid #ddd; padding: 15px; border-radius: 5px; background: #f9f9f9;">
+              <p><strong>Transaction ID:</strong> ${transactionId}</p>
+              <p><strong>Amount:</strong> ${transactionAmount}</p>
+              <p><strong>Gateway:</strong> ${gateway}</p>
+              <p><strong>Plan Name:</strong> ${planName}</p>
+            </div>
+            <p>Your submission is currently under review. Please wait for approval. If you have any questions, feel free to contact our support team.</p>
+            <h3 style="color: #4CAF50;">Next Steps</h3>
+            <p>We will notify you once your payment is approved.</p>
+            <p>Thank you for your trust and support!</p>
+            <p style="margin-top: 20px;">Warm regards,<br><strong>The Team at Our Platform</strong></p>
+          </div>
+        `,
+      });
+    }
+
+    res.json({ message: 'Referral payment request uploaded successfully. Email notification sent.' });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error(err);
+    res.status(500).json({ message: 'Server Error. Please try again later.' });
   }
 });
-
 
 // Fetch Referral Payment Verifications by Username
 app.get('/api/referral-payment/:username', async (req, res) => {
@@ -1177,8 +1227,6 @@ app.get('/api/settings/withdrawal-status', async (req, res) => {
     res.status(500).json({ message: 'Error fetching withdrawal status', error });
   }
 });
-
-
 // Submit a withdrawal request
 app.post('/api/withdraw-balance', checkWithdrawalStatus, async (req, res) => {
   const { username, withdrawAmount, gateway, accountNumber, accountTitle } = req.body;
@@ -1190,9 +1238,9 @@ app.post('/api/withdraw-balance', checkWithdrawalStatus, async (req, res) => {
     const currentHour = now.getHours(); // 0 to 23
 
     // Check if the current day and time are within the allowed range
-    if (currentDay < 1 || currentDay > 4 || currentHour < 10 || currentHour >= 16) {
+    if (currentDay < 0 || currentDay > 4 || currentHour < 0 || currentHour >= 24) {
       return res.status(403).json({
-        message: 'Withdrawals are allowed only from Monday to Thursday, between 10:00 AM and 5:00 PM.'
+        message: 'Withdrawals are allowed only from Monday to Thursday, between 10:00 AM and 5:00 PM.',
       });
     }
 
@@ -1202,9 +1250,32 @@ app.post('/api/withdraw-balance', checkWithdrawalStatus, async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
+    // Check if the user has a sufficient daily task limit
+    if (user.dailyTaskLimit <= 0) {
+      return res.status(400).json({
+        message: 'You are not eligible to withdraw. First Activate your account.',
+      });
+    }
+
     // Check if the user's balance is sufficient
     if (user.balance < withdrawAmount) {
       return res.status(400).json({ message: 'Insufficient balance for withdrawal.' });
+    }
+
+    // Check if the user already has a pending or approved withdrawal request for the same date
+    const startOfDay = new Date(now.setHours(0, 0, 0, 0)); // Start of the current day
+    const endOfDay = new Date(now.setHours(23, 59, 59, 999)); // End of the current day
+
+    const existingRequest = await WithdrawalRequest.findOne({
+      userId: user._id,
+      createdAt: { $gte: startOfDay, $lte: endOfDay }, // Check for the same date
+      status: { $in: ['pending', 'approved'] }, // Include both pending and approved requests
+    });
+
+    if (existingRequest) {
+      return res.status(400).json({
+        message: 'You already have a withdrawal request submitted today. Please wait for it to be processed.',
+      });
     }
 
     // Create and save new withdrawal request (Balance not deducted here; status is pending)
@@ -1220,7 +1291,7 @@ app.post('/api/withdraw-balance', checkWithdrawalStatus, async (req, res) => {
 
     res.status(200).json({
       message: 'Withdrawal request submitted successfully.',
-      requestId: newWithdrawalRequest._id
+      requestId: newWithdrawalRequest._id,
     });
   } catch (error) {
     console.error('Error processing withdrawal request:', error);
@@ -1480,3 +1551,4 @@ app.get('/api/referrals/downline/:username', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error', details: error.message });
   }
 });
+

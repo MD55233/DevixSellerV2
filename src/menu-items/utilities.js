@@ -6,7 +6,7 @@ import {
   IconFileInvoice,       // Added new icon for 'Task Transactions'
   IconCoins,             // Added new icon for 'Deposit History'
   IconArrowBackUp,       // Added new icon for 'Withdraw History'
-  IconFileText,          // Added new icon for 'Training Bonus History'
+            // Added new icon for 'Training Bonus History'
   IconBox,               // Added new icon for 'Product Profit History'
 } from '@tabler/icons-react';
 
@@ -19,7 +19,7 @@ const icons = {
   IconFileInvoice,       // New icon for Task Transactions
   IconCoins,             // New icon for Deposit History
   IconArrowBackUp,       // New icon for Withdraw History
-  IconFileText,          // New icon for Training Bonus History
+            // New icon for Training Bonus History
   IconBox,               // New icon for Product Profit History
 };
 
@@ -63,15 +63,7 @@ const utilities = {
       icon: icons.IconArrowBackUp,  // New icon for Withdraw History
       breadcrumbs: false
     },
-    {
-      id: 'Training Bonus History',
-      title: 'Training Bonus History',
-      type: 'item',
-      url: '/Transactions/training-bonus-history',
-      icon: icons.IconFileText,  // New icon for Training Bonus History
-      breadcrumbs: false
-    },
-    {
+   {
       id: 'Product Profit History',
       title: 'Product Profit History',
       type: 'item',

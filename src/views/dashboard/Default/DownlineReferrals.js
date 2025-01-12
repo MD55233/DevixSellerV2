@@ -73,7 +73,7 @@ const DownlineReferrals = () => {
                           <>
                             <Typography variant="body2">Email: {ref.email}</Typography>
                             <Typography variant="body2">Plan: {ref.planName || 'Not Activated'}</Typography>
-                            <Typography variant="body2">Balance: ${ref.balance || '0.00'}</Typography>
+                            <Typography variant="body2">Balance: Rs {ref.balance || '0.00'}</Typography>
                             <Box sx={{
                         ...getStatusStyles(ref.planStatus),
                         padding: '4px 8px',
@@ -120,7 +120,7 @@ const DownlineReferrals = () => {
                           <>
                             <Typography variant="body2">Email: {ref.email}</Typography>
                             <Typography variant="body2">Plan Activated: {ref.planName || 'No Plan'}</Typography>
-                            <Typography variant="body2">Balance: ${ref.balance || '0.00'}</Typography>
+                            <Typography variant="body2">Balance: Rs {ref.balance || '0.00'}</Typography>
                             <Box sx={{
                         ...getStatusStyles(ref.planStatus),
                         padding: '4px 8px',
