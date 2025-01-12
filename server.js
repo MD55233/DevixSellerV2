@@ -1238,7 +1238,7 @@ app.post('/api/withdraw-balance', checkWithdrawalStatus, async (req, res) => {
     const currentHour = now.getHours(); // 0 to 23
 
     // Check if the current day and time are within the allowed range
-    if (currentDay < 0 || currentDay > 4 || currentHour < 0 || currentHour >= 24) {
+    if (currentDay < 1 || currentDay > 4 || currentHour < 10 || currentHour >= 17) {
       return res.status(403).json({
         message: 'Withdrawals are allowed only from Monday to Thursday, between 10:00 AM and 5:00 PM.',
       });
