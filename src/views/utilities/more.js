@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Grid, Typography, Card, Avatar } from '@mui/material';
+import { Box, Grid, Typography, Card, Avatar, Button } from '@mui/material';
 import { green } from '@mui/material/colors';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
@@ -24,17 +24,31 @@ const MorePage = () => {
     { label: 'Personal Information', icon: <PersonIcon />, route: '/utilities/userInfoPage' },
     { label: 'Bank Information', icon: <AccountBalanceWalletIcon />, route: '/wallet/all' },
     { label: 'Account Security', icon: <SettingsIcon />, route: '/password-change' },
-   
     { label: 'Sign Out', icon: <ExitToAppIcon />, route: '/pages/login/login3' },
   ];
 
   const [isLoading, setLoading] = useState(true);
+  const [installPromptEvent, setInstallPromptEvent] = useState(null); // Store the beforeinstallprompt event
+  const [isInstallVisible, setInstallVisible] = useState(false);
 
   useEffect(() => {
     setLoading(false);
+
+    // Listen for the beforeinstallprompt event
+    window.addEventListener('beforeinstallprompt', (event) => {
+      event.preventDefault(); // Prevent the default mini-infobar or banner
+      setInstallPromptEvent(event); // Save the event
+      setInstallVisible(true); // Show the install button
+    });
+
+    // Cleanup the event listener on component unmount
+    return () => {
+      window.removeEventListener('beforeinstallprompt', () => {});
+    };
   }, []);
 
   const { setAuthenticatedUsername } = useAuth();
+
   const handleLogout = async () => {
     try {
       setAuthenticatedUsername(null); // Clear the username from context (if applicable)
@@ -50,6 +64,21 @@ const MorePage = () => {
       handleLogout(); // If 'Sign Out' is clicked, call the handleLogout function
     } else {
       navigate(route); // Otherwise, navigate to the regular route
+    }
+  };
+
+  const handleInstallClick = () => {
+    if (installPromptEvent) {
+      // Show the install prompt
+      installPromptEvent.prompt();
+      installPromptEvent.userChoice.then((choiceResult) => {
+        if (choiceResult.outcome === 'accepted') {
+          console.log('User accepted the PWA install prompt');
+        } else {
+          console.log('User dismissed the PWA install prompt');
+        }
+        setInstallVisible(false); // Hide the button after the prompt
+      });
     }
   };
 
@@ -75,6 +104,27 @@ const MorePage = () => {
       <Grid item lg={4} md={6} sm={6} xs={12} sx={{ marginBottom: 2 }}>
         <TotalIncomeLightCard isLoading={isLoading} />
       </Grid>
+
+      {/* Install Button */}
+      {isInstallVisible && (
+        <Box sx={{ textAlign: 'center', marginBottom: 3 }}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleInstallClick}
+            sx={{
+              padding: '10px 20px',
+              borderRadius: '8px',
+              backgroundColor: green[700],
+              '&:hover': {
+                backgroundColor: green[800],
+              },
+            }}
+          >
+            Install App
+          </Button>
+        </Box>
+      )}
 
       <Grid container spacing={2}>
         {menuItems.map((item, index) => (

@@ -1,9 +1,9 @@
 // assets
-import { IconUserPlus, IconMoodPlus, IconDeviceTabletUp,IconCreditCard  , IconChecklist,IconCrown   } from '@tabler/icons-react';
+import {  IconMoodPlus, IconDeviceTabletUp,IconCreditCard  , IconChecklist,IconCrown   } from '@tabler/icons-react';
 
 // constant
 const icons = {
-  IconUserPlus,
+
   IconMoodPlus,
   IconDeviceTabletUp,
   IconChecklist,
@@ -18,13 +18,7 @@ const pages = {
   title: 'Payments',
   type: 'group',
   children: [
-    {
-      id: 'Training Bonus',
-      title: 'Training Bonus',
-      type: 'item',
-      url: '/payments/training-bonus',
-      icon: icons.IconUserPlus
-    },
+   
     {
       id: 'Upgrade Account',
       title: 'Upgrade Account',

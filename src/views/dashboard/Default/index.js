@@ -4,9 +4,9 @@ import { useNavigate } from 'react-router-dom'; // For navigation
 import { Grid } from '@mui/material';
 // project imports
 import EarningCard from './EarningCard';
-import UpgradeAccountCard from './UpgradeAccountCard';
+import TransactionsPage from './TransactionsPage';
 import NavigationPanel from './NavigationPanel';
-import DownlineReferrals from './DownlineReferrals';
+
 import { gridSpacing } from 'store/constant';
 import { useAuth } from 'views/pages/authentication/AuthContext'; // Import authentication context
 import WAVE_GIF from './wave-92_512.gif';
@@ -68,8 +68,8 @@ const Dashboard = () => {
           <NavigationPanel isLoading={isLoading} />
         </Grid>
         <Grid item xs={12}>
-          <UpgradeAccountCard isLoading={false} onUpgradeClick={handleUpgradeClick} />
-          <DownlineReferrals isLoading={isLoading} />
+          <TransactionsPage isLoading={false} onUpgradeClick={handleUpgradeClick} />
+        
         </Grid>
       </Grid>
       {/* Wave Animation */}

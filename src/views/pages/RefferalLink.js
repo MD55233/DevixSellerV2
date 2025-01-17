@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import {
   Typography,
   Box,
@@ -11,6 +11,9 @@ import {
 import { ContentCopy } from '@mui/icons-material';
 import { useAuth } from 'views/pages/authentication/AuthContext'; // Import useAuth
 import axios from 'axios';
+
+// Lazy load the DownlineReferrals component
+const DownlineReferrals = React.lazy(() => import('../dashboard/Default/DownlineReferrals')); // Adjust the import path
 
 const ReferralLink = () => {
   const { username } = useAuth(); // Fetch username from auth context
@@ -78,8 +81,9 @@ const ReferralLink = () => {
 
   // Show referral link if dailyTaskLimit is 2 or more
   return (
-    <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
-      <Card sx={{ p: 3, backgroundColor: '#ffffff', boxShadow: 3, borderRadius: '8px' }}>
+    <Box display="flex" flexDirection="column" alignItems="center"  sx={{ paddingTop: '2rem' }}>
+      {/* Referral Link Section */}
+      <Card sx={{ p: 3, backgroundColor: '#ffffff', boxShadow: 3, borderRadius: '8px', mb: 3 }}>
         <CardContent>
           <Typography variant="h5" gutterBottom>
             Your Referral Link
@@ -113,6 +117,11 @@ const ReferralLink = () => {
           </Box>
         </CardContent>
       </Card>
+
+      {/* Downline Referrals Section */}
+      <Suspense fallback={<CircularProgress size={50} />}>
+        <DownlineReferrals />
+      </Suspense>
     </Box>
   );
 };

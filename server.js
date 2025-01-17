@@ -419,7 +419,7 @@ app.post('/api/tasks/:taskId/complete', async (req, res) => {
     if (user.referralDetails && user.referralDetails.referrer) {
       const firstLevelReferrer = await User.findById(user.referralDetails.referrer);
       if (firstLevelReferrer) {
-        const firstLevelBonus = task.reward * 0.14; // 6% for first-level referrer
+        const firstLevelBonus = task.reward * 0.03; // 6% for first-level referrer
         firstLevelReferrer.pendingCommission += firstLevelBonus;
 
         // Add a transaction for the first-level referrer
@@ -435,7 +435,7 @@ app.post('/api/tasks/:taskId/complete', async (req, res) => {
         if (firstLevelReferrer.referralDetails && firstLevelReferrer.referralDetails.referrer) {
           const secondLevelReferrer = await User.findById(firstLevelReferrer.referralDetails.referrer);
           if (secondLevelReferrer) {
-            const secondLevelBonus = task.reward * 0.06; // 3% for second-level referrer
+            const secondLevelBonus = task.reward * 0.01; // 3% for second-level referrer
             secondLevelReferrer.pendingCommission += secondLevelBonus;
 
             // Add a transaction for the second-level referrer
@@ -1512,14 +1512,14 @@ app.get('/api/referrals/downline/:username', async (req, res) => {
     // Fetch direct downlines
     const directReferrals = await User.find(
       { 'referralDetails.referrer': userId },
-      'fullName username email dailyTaskLimit'
+      'fullName username email dailyTaskLimit balance'
     ).exec();
 
     // Fetch indirect downlines
     const directReferralIds = directReferrals.map((u) => u._id);
     const indirectReferrals = await User.find(
       { 'referralDetails.referrer': { $in: directReferralIds } },
-      'fullName username email dailyTaskLimit'
+      'fullName username email dailyTaskLimit balance'
     ).exec();
 
     // Fetch all plans for comparison
@@ -1545,7 +1545,22 @@ app.get('/api/referrals/downline/:username', async (req, res) => {
     res.status(200).json({
       directReferrals: enrichedDirectReferrals,
       indirectReferrals: enrichedIndirectReferrals,
+      summary: {
+        activatedDirect: enrichedDirectReferrals.filter((u) => u.planStatus === 'Activated').length,
+        notActivatedDirect: enrichedDirectReferrals.filter((u) => u.planStatus === 'Account not activated').length,
+        planBreakdownDirect: plans.map((plan) => ({
+          planName: plan.name,
+          count: enrichedDirectReferrals.filter((u) => u.planName === plan.name).length,
+        })),
+        activatedIndirect: enrichedIndirectReferrals.filter((u) => u.planStatus === 'Activated').length,
+        notActivatedIndirect: enrichedIndirectReferrals.filter((u) => u.planStatus === 'Account not activated').length,
+        planBreakdownIndirect: plans.map((plan) => ({
+          planName: plan.name,
+          count: enrichedIndirectReferrals.filter((u) => u.planName === plan.name).length,
+        })),
+      },
     });
+    
   } catch (error) {
     console.error('Error fetching downlines:', error);
     res.status(500).json({ error: 'Internal Server Error', details: error.message });

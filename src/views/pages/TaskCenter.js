@@ -15,6 +15,8 @@ import {
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import TaskIcon from '@mui/icons-material/AssignmentTurnedIn';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
+import WAVE_GIF from '../dashboard/Default/wave-92_512.gif'; 
+
 
 const TaskCenter = ({ apiBaseUrl }) => {
   const [userData, setUserData] = useState({
@@ -28,6 +30,13 @@ const TaskCenter = ({ apiBaseUrl }) => {
   const [openDialog, setOpenDialog] = useState(false);
   const [taskMessage, setTaskMessage] = useState('');
   const { username } = useAuth(); // Using useAuth for user data
+
+  // Animation state for the wave GIF
+  const [showAnimation, setShowAnimation] = useState(true);
+  const [animationStyle, setAnimationStyle] = useState({
+    transform: 'translateY(100%)', // Start with swipe-up (offscreen)
+    transition: 'transform 0.5s ease-in-out',
+  });
 
   // Fetch user data and tasks on component load
   useEffect(() => {
@@ -60,10 +69,32 @@ const TaskCenter = ({ apiBaseUrl }) => {
     }
   }, [username, apiBaseUrl]);
 
+  useEffect(() => {
+    // Trigger swipe-up when the page loads
+    setTimeout(() => {
+      setAnimationStyle((prev) => ({
+        ...prev,
+        transform: 'translateY(0)', // Swipe up into view
+      }));
+    }, 100);
+
+    // Trigger swipe-down and hide animation after 10 seconds
+    const timer = setTimeout(() => {
+      setAnimationStyle((prev) => ({
+        ...prev,
+        transform: 'translateY(100%)', // Swipe down out of view
+      }));
+      setTimeout(() => setShowAnimation(false), 500); // Remove the element after animation
+    }, 5000);
+
+    return () => clearTimeout(timer); // Cleanup timer
+  }, []);
+
+
   const handleCompleteTask = async (taskId) => {
     // Check if today is Sunday
     const today = new Date();
-    if (today.getDay() === 0) {
+    if (today.getDay() === 4) {
       alert('Task completion is not allowed on Sundays.');
       return;
     }
@@ -189,6 +220,26 @@ const TaskCenter = ({ apiBaseUrl }) => {
           )}
         </DialogContent>
       </Dialog>
+      {/* Wave Animation */}
+      {showAnimation && (
+        <div
+          style={{
+            position: 'fixed',
+            bottom: '20px',
+            right: '-10px',
+            width: '150px',
+            height: '150px',
+            zIndex: 1000,
+            ...animationStyle, // Apply animation styles
+          }}
+        >
+          <img
+            src={WAVE_GIF} // Use the constant for the GIF path
+            alt="Wave Animation"
+            style={{ width: '100%', height: '100%' }}
+          />
+        </div>
+      )}
     </Box>
   );
 };
