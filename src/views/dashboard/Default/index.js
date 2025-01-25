@@ -1,20 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom'; // For navigation
-// material-ui
-import { Grid } from '@mui/material';
-// project imports
+import { Grid, Box, CircularProgress } from '@mui/material'; // Import CircularProgress and Box
 import EarningCard from './EarningCard';
 import TransactionsPage from './TransactionsPage';
 import NavigationPanel from './NavigationPanel';
-
 import { gridSpacing } from 'store/constant';
 import { useAuth } from 'views/pages/authentication/AuthContext'; // Import authentication context
-import WAVE_GIF from './wave-92_512.gif';
-
-// Constant for the GIF path
-
-
-// ==============================|| DEFAULT DASHBOARD ||============================== //
+import WAVE_GIF from './wave-92_512.gif'; // Import GIF
 
 const Dashboard = () => {
   const [isLoading, setLoading] = useState(true);
@@ -63,14 +55,34 @@ const Dashboard = () => {
   return (
     <>
       <Grid container spacing={gridSpacing}>
-        <Grid item xs={12}>
-          <EarningCard isLoading={isLoading} />
-          <NavigationPanel isLoading={isLoading} />
-        </Grid>
-        <Grid item xs={12}>
-          <TransactionsPage isLoading={false} onUpgradeClick={handleUpgradeClick} />
-        
-        </Grid>
+        {isLoading ? (
+          <Grid item xs={12}>
+            <Box
+              sx={{
+                width: '100%',
+                height: '200px', // Height of the loading rectangle
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                backgroundColor: '#f5f5f5', // Light gray background for loading
+                borderRadius: '8px', // Rounded corners
+                boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)', // Subtle shadow
+              }}
+            >
+              <CircularProgress />
+            </Box>
+          </Grid>
+        ) : (
+          <>
+            <Grid item xs={12}>
+              <EarningCard isLoading={isLoading} />
+              <NavigationPanel isLoading={isLoading} />
+            </Grid>
+            <Grid item xs={12}>
+              <TransactionsPage isLoading={false} onUpgradeClick={handleUpgradeClick} />
+            </Grid>
+          </>
+        )}
       </Grid>
       {/* Wave Animation */}
       {showAnimation && (

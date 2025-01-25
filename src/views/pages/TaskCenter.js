@@ -92,34 +92,41 @@ const TaskCenter = ({ apiBaseUrl }) => {
 
 
   const handleCompleteTask = async (taskId) => {
-    // Check if today is Sunday
     const today = new Date();
-    if (today.getDay() === 4) {
-      alert('Task completion is not allowed on Sundays.');
-      return;
-    }
-
-    setLoadingTask(true);
-    setOpenDialog(true);
-    setTaskMessage('Processing task... Please wait.');
-
+    const isSunday = today.getDay() === 0; // Sunday check (0 is Sunday in JavaScript)
+    
     try {
-      const response = await axios.post(
+      // Fetch user data to check planActivationDate
+      const response = await axios.get(`${process.env.REACT_APP_API_HOST}/api/user/${username}`);
+      const userPlanActivationDate = new Date(response.data.user.planActivationDate).toDateString();
+      const todayDate = today.toDateString(); // Convert to string for comparison
+  
+      // Restrict task completion on Sundays unless planActivationDate is today
+      if (isSunday && userPlanActivationDate !== todayDate) {
+        alert('Task completion is not allowed on Sundays');
+        return;
+      }
+  
+      setLoadingTask(true);
+      setOpenDialog(true);
+      setTaskMessage('Processing task... Please wait.');
+  
+      const taskCompletionResponse = await axios.post(
         `${process.env.REACT_APP_API_HOST}/api/tasks/${taskId}/complete`,
         { username }
       );
-
-      const { redirectLink } = response.data;
-
+  
+      const { redirectLink } = taskCompletionResponse.data;
+  
       // Remove the completed task from the list
       setTasks((prevTasks) => prevTasks.filter((task) => task._id !== taskId));
-
+  
       // Update the user data
       setUserData((prevData) => ({
         ...prevData,
         completedTasks: prevData.completedTasks + 1,
       }));
-
+  
       // Set success message and redirect
       setTaskMessage('Wait for 10s on other site then comeback and Claim Bonus! Redirecting...');
       if (redirectLink) {
@@ -134,7 +141,7 @@ const TaskCenter = ({ apiBaseUrl }) => {
       setLoadingTask(false);
     }
   };
-
+  
   return (
     <Box p={2}>
       <Card sx={{ mb: 3, p: 2, borderRadius: '16px', backgroundColor: '#E8F5E9' }}>

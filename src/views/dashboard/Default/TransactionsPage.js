@@ -13,7 +13,7 @@ const TransactionsPage = () => {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [userData, setUserData] = useState({ taskLimit: 0 }); // Store user data including taskLimit
+  const [ setUserData] = useState({ taskLimit: 0 }); // Store user data
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -114,57 +114,40 @@ const TransactionsPage = () => {
 
   return (
     <Box sx={{ padding: '16px' }}>
-      {userData.taskLimit > 0 ? (
-        <>
-          <Box sx={{ marginTop: '32px', marginBottom: '32px' }}>
-            <Typography variant="h5" gutterBottom>
-              Profits Overview
-            </Typography>
-            <PieChart width={350} height={350}>
-  <Pie
-    data={pieData}
-    cx="50%"
-    cy="50%"
-    innerRadius={65} // Creates the donut shape
-    outerRadius={100} // Sets the outer radius
-    fill="#8884d8"
-    paddingAngle={5} // Adds spacing between slices
-    dataKey="value"
-    labelLine={false} // Removes label lines
-    label={({ percent }) =>
-      `${(percent * 100).toFixed(0)}%`
-    } // Display percentage in slices
-  >
-    {pieData.map((entry, index) => (
-      <Cell
-        key={`cell-${index}`}
-        fill={COLORS[index % COLORS.length]}
-      />
-    ))}
-  </Pie>
-  {/* Custom Total in the Center */}
- 
-  <Legend
-    layout="vertical"
-    verticalAlign="middle"
-    align="right"
-    wrapperStyle={{ paddingLeft: 20 }}
-  />
-  <Tooltip />
-</PieChart>
+            <UpgradeAccountCard isLoading={false} onUpgradeClick={handleUpgradeClick} />
+      <Box sx={{ marginTop: '32px', marginBottom: '32px' }}>
 
-          </Box>
-          <Suspense fallback={<CircularProgress />}>
-            <TransactionChart title="Credits" transactions={transactions.filter((tx) => tx.type === 'Credit')} />
-            <TransactionChart title="Task Transactions" transactions={transactions.filter((tx) => tx.type === 'Task Transaction')} />
-            <TransactionChart title="Withdrawals" transactions={transactions.filter((tx) => tx.type === 'Withdrawal')} />
-          </Suspense>
-        </>
-      ) : (
-        <Suspense fallback={<CircularProgress />}>
-          <UpgradeAccountCard isLoading={false} onUpgradeClick={handleUpgradeClick} />
-        </Suspense>
-      )}
+        <Typography variant="h5" gutterBottom>
+          Profits Overview
+        </Typography>
+        <PieChart width={350} height={350}>
+          <Pie
+            data={pieData}
+            cx="50%"
+            cy="50%"
+            innerRadius={65} // Creates the donut shape
+            outerRadius={100} // Sets the outer radius
+            fill="#8884d8"
+            paddingAngle={5} // Adds spacing between slices
+            dataKey="value"
+            labelLine={false} // Removes label lines
+            label={({ percent }) => `${(percent * 100).toFixed(0)}%`} // Display percentage in slices
+          >
+            {pieData.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+            ))}
+          </Pie>
+          <Legend layout="vertical" verticalAlign="middle" align="right" wrapperStyle={{ paddingLeft: 20 }} />
+          <Tooltip />
+        </PieChart>
+      </Box>
+      <Suspense fallback={<CircularProgress />}>
+     
+        <TransactionChart title="Credits" transactions={transactions.filter((tx) => tx.type === 'Credit')} />
+        <TransactionChart title="Task Transactions" transactions={transactions.filter((tx) => tx.type === 'Task Transaction')} />
+        <TransactionChart title="Withdrawals" transactions={transactions.filter((tx) => tx.type === 'Withdrawal')} />
+       
+      </Suspense>
     </Box>
   );
 };

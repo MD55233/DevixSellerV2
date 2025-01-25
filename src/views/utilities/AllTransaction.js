@@ -81,7 +81,7 @@ const TransactionHistory = () => {
             type: 'Task Transaction',
             status: item.status,
             amount: item.amount,
-            taskName: item.taskId.name,  // Add task name from populated taskId
+            taskName: item.taskId?.name || 'Task',  // Add task name from populated taskId
             accountNumber: '-',  // Placeholder
             gateway: '-',  // Placeholder
             remarks: item.description,

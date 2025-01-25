@@ -11,6 +11,7 @@ const jwt = require('jsonwebtoken');
 const app = express();
 const PORT = 8001;
 
+
 // SMTP Configuration for Hostinger Webmail
 const transporter = nodemailer.createTransport({
   host: "smtp.hostinger.com",
@@ -34,7 +35,6 @@ const generateCredentials = () => {
 
   return { username, password };
 };
-
 
 // ------------||Serve static files from the 'uploads' directory||----------------------
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
@@ -75,7 +75,7 @@ const userSchema = new mongoose.Schema(
     password: { type: String, required: true , unique: true },
     email: { type: String, required: true},
     phoneNumber: { type: String, required: true },
-    accountType: { type: String, required: true,  default: 'Starter' }, // e.g., "Starter", "Pro", "Premium"
+    accountType: { type: String, required: true,  default: 'none' }, // e.g., "Starter", "Pro", "Premium"
     balance: { type: Number, default: 0 },
     withdrawalBalance: { type: Number, default: 0 },
     dailyTaskLimit: { type: Number, required: true , default: 0},
@@ -112,6 +112,7 @@ const userSchema = new mongoose.Schema(
     profilePicture: { type: String, default: null },
     parent: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
     pendingCommission: { type: Number, default: 0 },
+    lastSalaryClaimDate: { type: Date, default: null }, // Added field
   },
   { timestamps: true }
 );
@@ -278,6 +279,7 @@ app.get('/api/user/:username', async (req, res) => {
       pendingCommission: user.pendingCommission,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
+      lastSalaryClaimDate: user.lastSalaryClaimDate,
     };
 
     // Return the complete user data
@@ -1567,3 +1569,153 @@ app.get('/api/referrals/downline/:username', async (req, res) => {
   }
 });
 
+
+
+// ]--------------------||EndPoint to Handle salary||---------------------------[
+// Salary Schema
+const salarySchema = new mongoose.Schema(
+  {
+    salaryAmount: { type: Number, required: true },
+    claimDate: { type: Date, default: null },
+    claimableAfter: { type: Date, required: true },
+    status: { type: Number, default: null },
+    directReferralCount: { type: Number, required: true, min: 0 },
+    indirectReferralCount: { type: Number, required: true, min: 0 },
+    transactionHistory: [
+      {
+        user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+        amount: { type: Number, required: true },
+        description: { type: String, trim: true },
+        type: { type: String, enum: ['credit', 'debit'], required: true },
+        createdAt: { type: Date, default: Date.now },
+      },
+    ],
+  },
+  { timestamps: true }
+);
+
+// Define Salary model
+const Salary = mongoose.model('Salary', salarySchema);
+
+// Get all salary plans
+app.get('/api/salaries', async (req, res) => {
+  try {
+    const salaries = await Salary.find();
+    res.status(200).json(salaries);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching salary plans', error });
+  }
+});
+
+
+const salarytransactionSchema = new mongoose.Schema({
+  username: { type: String, required: true },
+  transactionType: { type: String, required: true }, // Example: "Salary"
+  transactionAmount: { type: Number, required: true },
+  transactionMonth: { type: Number, required: true },
+  transactionYear: { type: Number, required: true },
+  transactionDate: { type: Date, default: Date.now },
+  salaryPlanId: { type: mongoose.Schema.Types.ObjectId, ref: 'SalaryPlan' }, // Reference to the salary plan
+  status: { type: String, default: 'Completed', enum: ['Completed', 'Pending', 'Failed'] }, // Status of the transaction
+  notes: { type: String }, // Optional notes for additional info
+});
+
+// Add indexing for performance
+salarytransactionSchema.index({ username: 1, transactionMonth: 1, transactionYear: 1 });
+
+module.exports = mongoose.model('SalaryTransaction', salarytransactionSchema);
+
+app.post('/api/salaries/:planId/claim', async (req, res) => {
+  try {
+    const { planId } = req.params; // Plan ID from URL parameters
+    const { username } = req.body; // Username from the request body
+
+    // Find the salary plan by ID
+    const salaryPlan = await Salary.findById(planId);
+    if (!salaryPlan) {
+      return res.status(404).json({ error: "Salary plan not found" });
+    }
+
+    // Find the user by username
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth();
+    const currentYear = currentDate.getFullYear();
+
+    // Check if the user has already claimed a salary plan this month
+    if (
+      user.lastSalaryClaimDate &&
+      new Date(user.lastSalaryClaimDate).getMonth() === currentMonth &&
+      new Date(user.lastSalaryClaimDate).getFullYear() === currentYear
+    ) {
+      return res.status(400).json({
+        error: "You have already claimed a salary plan this month.",
+      });
+    }
+
+    // Verify user meets the eligibility requirements
+    if (
+      user.directReferrals < salaryPlan.directReferralCount ||
+      user.indirectReferrals < salaryPlan.indirectReferralCount
+    ) {
+      return res.status(400).json({
+        error: "You do not meet the eligibility requirements for this plan.",
+      });
+    }
+
+    // Mark the salary plan as claimed
+    salaryPlan.status = 1; // Assuming 1 represents "Claimed" status
+    salaryPlan.claimDate = currentDate;
+
+    // Add a transaction history for this claim
+    salaryPlan.transactionHistory.push({
+      user: user._id,
+      amount: salaryPlan.salaryAmount,
+      description: `Salary claimed by ${username}`,
+      type: 'credit', // 'credit' because the user is receiving salary
+    });
+    await salaryPlan.save();
+
+    // Update user's last salary claim date and pending commissions
+    user.lastSalaryClaimDate = currentDate;
+    user.pendingCommission = (user.pendingCommission || 0) + salaryPlan.salaryAmount;
+    await user.save();
+
+    return res.status(200).json({ message: "Salary plan claimed successfully!" });
+  } catch (error) {
+    console.error("Error claiming salary plan:", error);
+    res.status(500).json({ error: "An error occurred while claiming the salary plan." });
+  }
+});
+
+
+app.get('/api/salaries/:username', async (req, res) => {
+  const { username } = req.params;
+
+  try {
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const lastClaimDate = user.lastSalaryClaimDate;
+    const currentDate = new Date();
+    const daysSinceLastClaim = lastClaimDate
+      ? Math.floor((currentDate - new Date(lastClaimDate)) / (1000 * 60 * 60 * 24))
+      : null;
+
+    res.status(200).json({
+      lastSalaryClaimDate: lastClaimDate,
+      daysSinceLastClaim,
+      claimEligible: daysSinceLastClaim === null || daysSinceLastClaim >= 30,
+      remainingDays: daysSinceLastClaim !== null && daysSinceLastClaim < 30 ? 30 - daysSinceLastClaim : 0,
+    });
+  } catch (error) {
+    console.error('Error fetching salary data:', error);
+    res.status(500).json({ error: 'Internal Server Error', details: error.message });
+  }
+});

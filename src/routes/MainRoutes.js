@@ -12,6 +12,7 @@ const TraningBonus = Loadable(lazy(() => import('views/pages/training-bonus/Trai
 const UploadTraningBonus = Loadable(lazy(() => import('views/pages/training-bonus/UploadTrainingBonus')));
 const Invest = Loadable(lazy(() => import('views/pages/invest/Invest')));
 const ReferralLink  = Loadable(lazy(() => import('views/pages/RefferalLink')));
+const OfficialGroup  = Loadable(lazy(() => import('views/pages/OfficialGroup')));
 const ReferralPaymentVerification = Loadable(lazy(() => import('views/pages/invest/ReferralPaymentVerification')));
 const WithDraw = Loadable(lazy(() => import('views/pages/WithDraw')));
 const TaskCenter = Loadable(lazy(() => import('views/pages/TaskCenter')));
@@ -23,6 +24,7 @@ const WithdrawHistory = Loadable(lazy(() => import('views/utilities/WithdrawHist
 const TrainingBonusHistory = Loadable(lazy(() => import('views/utilities/TrainingBonusHistory')));
 const ProductHistory = Loadable(lazy(() => import('views/utilities/ProductHistory')));
 const More = Loadable(lazy(() => import('views/utilities/more')));
+const Salary = Loadable(lazy(() => import('views/utilities/salary')));
 const UserInfoPage = Loadable(lazy(() => import('views/utilities/UserInfoPage')));
 // Wallet routing
 const Wallet = Loadable(lazy(() => import('views/wallet/Wallet')));
@@ -150,6 +152,15 @@ const MainRoutes = {
       ]
     },
     {
+      path: 'community',
+      children: [
+        {
+          path: 'official-group',
+          element: <OfficialGroup />
+        }
+      ]
+    },
+    {
       path: 'payments',
       children: [
         {
@@ -161,6 +172,10 @@ const MainRoutes = {
             {
               path: 'upload',
               element: <UploadTraningBonus />
+            },
+            {
+              path: 'salary',
+              element: <Salary/>
             }
           ]
         },

@@ -48,9 +48,9 @@ const Footer = () => {
         <BottomNavigationAction
           label="Home"
           icon={<Home />}
-          sx={{
+          sx={{color: '#91bcb6',
             '&.Mui-selected': {
-              color: '#2C6831', // Icon color when active
+              color: '#00b57b', // Icon color when active
               backgroundColor: '#dbffe6', // Light green background when active
               borderRadius: '100px', // Small curve for the active button
               height: '100%', // Full height of the BottomNavigation
@@ -60,9 +60,9 @@ const Footer = () => {
         <BottomNavigationAction
           label="Tasks"
           icon={<Assignment />}
-          sx={{
+          sx={{color: '#91bcb6',
             '&.Mui-selected': {
-              color: '#2C6831', // Icon color when active
+              color: '#00b57b', // Icon color when active
               backgroundColor: '#dbffe6', // Light green background when active
               borderRadius: '100px', // Small curve for the active button
               height: '100%', // Full height of the BottomNavigation
@@ -72,9 +72,9 @@ const Footer = () => {
         <BottomNavigationAction
           label="Add Referral"
           icon={<PersonAdd />}
-          sx={{
+          sx={{color: '#91bcb6',
             '&.Mui-selected': {
-              color: '#2C6831', // Icon color when active
+              color: '#00b57b', // Icon color when active
               backgroundColor: '#dbffe6', // Light green background when active
               borderRadius: '100px', // Small curve for the active button
               height: '100%', // Full height of the BottomNavigation
@@ -84,9 +84,9 @@ const Footer = () => {
         <BottomNavigationAction
           label="More"
           icon={<MoreHoriz />}
-          sx={{
+          sx={{color: '#91bcb6',
             '&.Mui-selected': {
-              color: '#2C6831', // Icon color when active
+              color: '#00b57b', // Icon color when active
               backgroundColor: '#dbffe6', // Light green background when active
               borderRadius: '100px', // Small curve for the active button
               height: '100%', // Full height of the BottomNavigation

@@ -1,14 +1,14 @@
 // assets
-import {  IconMoodPlus, IconDeviceTabletUp,IconCreditCard  , IconChecklist,IconCrown   } from '@tabler/icons-react';
+import {  IconMoodPlus, IconDeviceTabletUp, IconCreditCard, IconCrown,IconChecklist,IconWashEco } from '@tabler/icons-react';
 
 // constant
 const icons = {
-
   IconMoodPlus,
   IconDeviceTabletUp,
+  IconCreditCard,
+  IconCrown,
   IconChecklist,
-  IconCrown ,
-  IconCreditCard  
+  IconWashEco  
 };
 
 // ==============================|| EXTRA PAGES MENU ITEMS ||============================== //
@@ -18,7 +18,6 @@ const pages = {
   title: 'Payments',
   type: 'group',
   children: [
-   
     {
       id: 'Upgrade Account',
       title: 'Upgrade Account',
@@ -32,6 +31,13 @@ const pages = {
       type: 'item',
       url: '/payment-accounts',
       icon: icons.IconCreditCard  
+    },
+    {
+      id: 'Salary',
+      title: 'Claim Salary',
+      type: 'item',
+      url: '/payments/salary',
+      icon: icons.IconWashEco  // Updated icon for Salary
     },
     {
       id: 'Add Referral',
