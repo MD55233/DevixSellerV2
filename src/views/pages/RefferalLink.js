@@ -21,7 +21,7 @@ const ReferralLink = () => {
   const [loading, setLoading] = useState(true); // State for loading indicator
 
   const referralLink = username
-    ? `https://pk.laikostar.com/pages/register/register3/${username}`
+    ? `https://pk.Devix.com/pages/register/register3/${username}`
     : 'Username not available';
 
   // Fetch user's details and daily task limit
@@ -29,7 +29,7 @@ const ReferralLink = () => {
     const fetchUserDetails = async () => {
       try {
         const response = await axios.get(
-          `https://api1.laikostar.com/api/user/${username}` // Replace with your actual API endpoint
+          `https://api1.Devix.com/api/user/${username}` // Replace with your actual API endpoint
         );
         setDailyTaskLimit(response.data.user.dailyTaskLimit); // Get task limit from API response
       } catch (error) {

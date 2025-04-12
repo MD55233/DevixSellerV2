@@ -116,9 +116,7 @@ const BarChart = ({ title, transactions }) => {
         margin: '0 auto',
         marginBottom: '32px',
         height: '400px', // Default height
-        '@media (max-width: 768px)': {
-          height: '250px', // Smaller height for mobile
-        },
+      
       }}
     >
       <Typography

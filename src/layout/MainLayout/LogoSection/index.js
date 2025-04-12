@@ -41,7 +41,7 @@ const LogoSection = () => {
             color: 'secondary.main'
           }}
         >
-          Laiko
+          Devix
         </Typography>
         <Typography
           variant="h6"
@@ -55,7 +55,7 @@ const LogoSection = () => {
             mt: 0.5
           }}
         >
-          Star
+         Seller
         </Typography>
       </Box>
     </ButtonBase>

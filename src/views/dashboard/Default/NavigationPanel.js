@@ -105,7 +105,7 @@ const NavigationPanel = () => {
         <NavigationCard
           title="News"
           icon={NewsIcon}
-          onClick={() => window.open('https://www.laikostar.com/news/', '_blank')}
+          onClick={() => window.open('https://www.Devix.com/news/', '_blank')}
         />
       </Grid>
        {/* New Boxes */}

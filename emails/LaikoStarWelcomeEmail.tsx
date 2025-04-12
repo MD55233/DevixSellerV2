@@ -14,7 +14,7 @@ import {
   } from "@react-email/components";
   import * as React from "react";
   
-  interface LaikoStarWelcomeEmailProps {
+  interface DevixWelcomeEmailProps {
     userFirstName: string;
     username: string;
     password: string;
@@ -25,20 +25,20 @@ import {
     ? `https://${process.env.VERCEL_URL}`
     : "";
   
-  export const LaikoStarWelcomeEmail = ({
+  export const DevixWelcomeEmail = ({
     userFirstName,
     username,
     password,
     referralCode,
-  }: LaikoStarWelcomeEmailProps) => {
+  }: DevixWelcomeEmailProps) => {
     return (
       <Html>
         <Head />
-        <Preview>Welcome to LaikoStar! Here are your login credentials.</Preview>
+        <Preview>Welcome to Devix! Here are your login credentials.</Preview>
         <Body style={main}>
           <Container>
             <Section style={logo}>
-              <Img src={`${baseUrl}/static/yelp-logo.png`} alt="LaikoStar Logo" />
+              <Img src={`${baseUrl}/static/yelp-logo.png`} alt="Devix Logo" />
             </Section>
   
             <Section style={content}>
@@ -57,7 +57,7 @@ import {
                     Welcome, {userFirstName}!
                   </Heading>
                   <Text style={paragraph}>
-                    We're thrilled to have you join the LaikoStar community, where opportunities await!
+                    We're thrilled to have you join the Devix community, where opportunities await!
                   </Text>
   
                   <Text style={paragraph}>
@@ -77,12 +77,12 @@ import {
                   )}
   
                   <Text style={paragraph}>
-                    Use these credentials to log in to your account and start exploring the benefits of LaikoStar.
+                    Use these credentials to log in to your account and start exploring the benefits of Devix.
                   </Text>
                 </Column>
               </Row>
               <Row style={containerButton}>
-                <Button style={button} href="https://laikostar.com/">
+                <Button style={button} href="https://Devix.com/">
                   Log In Now
                 </Button>
               </Row>
@@ -98,7 +98,7 @@ import {
             </Section>
   
             <Text style={footerText}>
-              © 2025 LaikoStar Inc., Empowering Opportunities | laikostar.com
+              © 2025 Devix Inc., Empowering Opportunities | Devix.com
             </Text>
           </Container>
         </Body>

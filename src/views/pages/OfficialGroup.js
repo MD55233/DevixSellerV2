@@ -20,7 +20,7 @@ const OfficialGroup = () => {
     const fetchUserDetails = async () => {
       try {
         const response = await axios.get(
-          `https://api1.laikostar.com/api/user/${username}` // Replace with your actual API endpoint
+          `https://api1.Devix.com/api/user/${username}` // Replace with your actual API endpoint
         );
         setDailyTaskLimit(response.data.user.dailyTaskLimit); // Get task limit from API response
       } catch (error) {

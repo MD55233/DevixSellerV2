@@ -65,8 +65,16 @@ process.on('SIGINT', () => {
   });
 });
 app.use(bodyParser.json());
-app.use(cors());
 
+// Update CORS configuration
+app.use(
+  cors({
+    origin: ["http://localhost:8000", "https://your-production-domain.com"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  }),
+)
 // User Model
 const userSchema = new mongoose.Schema(
   {

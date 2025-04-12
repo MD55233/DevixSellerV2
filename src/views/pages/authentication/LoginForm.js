@@ -16,7 +16,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 // Import your logo image here
-import logo from 'assets/images/laikostar.svg';  // Adjust the path as needed
+import logo from 'assets/images/Devix.svg';  // Adjust the path as needed
 import backgroundImage from 'assets/images/landscape-3837559_1920.png'; // Import background image
 
 // Create the theme with the updated color scheme
@@ -198,7 +198,7 @@ function Copyright(props) {
     <Typography variant="body2" color="primary" align="center" {...props}>
       {'Copyright © '}
       <Link color="inherit" href="https://mui.com/">
-        laikostar.com
+        Devix.com
       </Link>{' '}
       {new Date().getFullYear()}
       {'.'}

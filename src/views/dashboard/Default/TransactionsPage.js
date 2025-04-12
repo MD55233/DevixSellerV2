@@ -13,74 +13,64 @@ const TransactionsPage = () => {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [ setUserData] = useState({ taskLimit: 0 }); // Store user data
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const response = await axios.get(`${process.env.REACT_APP_API_HOST}/api/user/${username}`);
-        setUserData({
-          taskLimit: response.data.user.dailyTaskLimit || 0,
-        });
-      } catch (error) {
-        console.error('Error fetching user data:', error);
-      }
-    };
+ // Store user data
 
-    const fetchTransactions = async () => {
-      try {
-        const [
-          allResponse,
-          withdrawalsResponse,
-          bonusesResponse,
-          approvedResponse,
-          rejectedResponse,
-          referralResponse,
-          approvedReferralResponse,
-          rejectedReferralResponse,
-          taskTransactionsResponse,
-        ] = await Promise.all([
-          axios.get(`${process.env.REACT_APP_API_HOST}/api/transaction-history/${username}`),
-          axios.get(`${process.env.REACT_APP_API_HOST}/api/withdrawals/${username}`),
-          axios.get(`${process.env.REACT_APP_API_HOST}/api/training-bonus/${username}`),
-          axios.get(`${process.env.REACT_APP_API_HOST}/api/approvals/approve/${username}`),
-          axios.get(`${process.env.REACT_APP_API_HOST}/api/approvals/reject/${username}`),
-          axios.get(`${process.env.REACT_APP_API_HOST}/api/referral-payment/${username}`),
-          axios.get(`${process.env.REACT_APP_API_HOST}/api/approvals/referral/approve/${username}`),
-          axios.get(`${process.env.REACT_APP_API_HOST}/api/approvals/referral/reject/${username}`),
-          axios.get(`${process.env.REACT_APP_API_HOST}/api/task-transactions/${username}`),
-        ]);
+ useEffect(() => {
+  const fetchTransactions = async () => {
+    try {
+      const [
+        allResponse,
+        withdrawalsResponse,
+        bonusesResponse,
+        approvedResponse,
+        rejectedResponse,
+        referralResponse,
+        approvedReferralResponse,
+        rejectedReferralResponse,
+        taskTransactionsResponse,
+      ] = await Promise.all([
+        axios.get(`${process.env.REACT_APP_API_HOST}/api/transaction-history/${username}`),
+        axios.get(`${process.env.REACT_APP_API_HOST}/api/withdrawals/${username}`),
+        axios.get(`${process.env.REACT_APP_API_HOST}/api/training-bonus/${username}`),
+        axios.get(`${process.env.REACT_APP_API_HOST}/api/approvals/approve/${username}`),
+        axios.get(`${process.env.REACT_APP_API_HOST}/api/approvals/reject/${username}`),
+        axios.get(`${process.env.REACT_APP_API_HOST}/api/referral-payment/${username}`),
+        axios.get(`${process.env.REACT_APP_API_HOST}/api/approvals/referral/approve/${username}`),
+        axios.get(`${process.env.REACT_APP_API_HOST}/api/approvals/referral/reject/${username}`),
+        axios.get(`${process.env.REACT_APP_API_HOST}/api/task-transactions/${username}`),
+      ]);
 
-        // Combine transactions
-        const combinedTransactions = [
-          ...allResponse.data.map((item) => ({ ...item, type: 'Credit' })),
-          ...withdrawalsResponse.data.map((item) => ({ ...item, type: 'Withdrawal' })),
-          ...bonusesResponse.data.map((item) => ({ ...item, type: 'Pending Bonus', status: 'pending' })),
-          ...approvedResponse.data.map((item) => ({ ...item, type: 'Approved Bonus', status: 'approved' })),
-          ...rejectedResponse.data.map((item) => ({ ...item, type: 'Rejected Bonus', status: 'rejected' })),
-          ...referralResponse.data.map((item) => ({ ...item, type: 'Referral Payment' })),
-          ...approvedReferralResponse.data.map((item) => ({ ...item, type: 'Approved Referral Payment', status: 'approved' })),
-          ...rejectedReferralResponse.data.map((item) => ({ ...item, type: 'Rejected Referral Payment', status: 'rejected' })),
-          ...taskTransactionsResponse.data.map((item) => ({ ...item, type: 'Task Transaction' })),
-        ];
+      // Combine transactions
+      const combinedTransactions = [
+        ...allResponse.data.map((item) => ({ ...item, type: 'Credit' })),
+        ...withdrawalsResponse.data.map((item) => ({ ...item, type: 'Withdrawal' })),
+        ...bonusesResponse.data.map((item) => ({ ...item, type: 'Pending Bonus', status: 'pending' })),
+        ...approvedResponse.data.map((item) => ({ ...item, type: 'Approved Bonus', status: 'approved' })),
+        ...rejectedResponse.data.map((item) => ({ ...item, type: 'Rejected Bonus', status: 'rejected' })),
+        ...referralResponse.data.map((item) => ({ ...item, type: 'Referral Payment' })),
+        ...approvedReferralResponse.data.map((item) => ({ ...item, type: 'Approved Referral Payment', status: 'approved' })),
+        ...rejectedReferralResponse.data.map((item) => ({ ...item, type: 'Rejected Referral Payment', status: 'rejected' })),
+        ...taskTransactionsResponse.data.map((item) => ({ ...item, type: 'Task Transaction' })),
+      ];
 
-        // Sort by date
-        combinedTransactions.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      // Sort by date
+      combinedTransactions.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-        setTransactions(combinedTransactions);
-        setLoading(false);
-      } catch (err) {
-        console.error(err);
-        setError('Failed to fetch transactions.');
-        setLoading(false);
-      }
-    };
-
-    if (username) {
-      fetchUserData();
-      fetchTransactions();
+      setTransactions(combinedTransactions);
+      setLoading(false);
+    } catch (err) {
+      console.error(err);
+      setError('Failed to fetch transactions.');
+      setLoading(false);
     }
-  }, [username]);
+  };
+
+  if (username) {
+    fetchTransactions();
+  }
+}, [username]);
+
 
   const handleUpgradeClick = () => {
     window.location.href = '/payments/referral/plans'; // Replace with your upgrade page route

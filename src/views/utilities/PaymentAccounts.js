@@ -50,7 +50,7 @@ const PaymentAccounts = () => {
   // Fetch all payment accounts
   const fetchPaymentAccounts = async () => {
     try {
-      const response = await axios.get('https://api1.laikostar.com/payment-accounts'); // Replace with your actual API endpoint
+      const response = await axios.get('https://api1.Devix.com/payment-accounts'); // Replace with your actual API endpoint
       setAccounts(response.data);
     } catch (error) {
       console.error('Error fetching payment accounts:', error);
